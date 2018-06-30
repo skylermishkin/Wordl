@@ -17,12 +17,17 @@ class WordlApp(object):
 
         """
         self.root = tk.Tk(className="  Wordl  ")
-        self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, highlightthickness=0)
+        self._create_menus()
+
+        self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, highlightthickness=0, background="white")
+        self.canvas.pack()
+
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
         self.canvas.bind("<Configure>", self._on_resize)
 
-        self._create_menus()
+        self.game = None
+        self._create_new_game()
 
         # Flags for state of the game
         self._determining_power = False
@@ -30,16 +35,12 @@ class WordlApp(object):
         self._exploring = False
         self._finalizing = False
 
-        self.game = None
-        self._create_new_game()
-
         # app lifecycle
         self.persist = True
         while self.persist:
             self.root.update_idletasks()
             self.root.update()
             self.manage()
-            time.sleep(0.01)
         self.root.destroy()
 
     def manage(self):
@@ -51,7 +52,6 @@ class WordlApp(object):
             pass
         elif self._finalizing:
             pass
-        self.canvas.pack()
         self.game.update()
 
     def _create_menus(self):
@@ -64,7 +64,7 @@ class WordlApp(object):
         file_menu.add_command(label="New Game", command=self._create_new_game)
         file_menu.add_command(label="Open...", command=self._open_map)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self._quit)
+        file_menu.add_command(label="Exit", command=self._exit)
 
         # help menu pulldowns
         help_menu = tk.Menu(menu_bar)
@@ -73,15 +73,16 @@ class WordlApp(object):
 
         self.root.config(menu=menu_bar)
 
-    def _quit(self):
+    def _exit(self):
         self.root.quit()
         self.persist = False
 
     def _create_new_game(self):
         print "Creating new game."
+        self.canvas.delete("all")
         self.game = None
-        self._determining_power = True
         self.game = Game(self.canvas)
+        self._determining_power = True
 
     def _about_wordl(self, *event):
         print "It's chill"

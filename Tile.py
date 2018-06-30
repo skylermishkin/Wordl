@@ -24,6 +24,12 @@ class Tile(object):
 
         self.draw()
 
+        self._moving = False
+        self.mouse_xpos = 0
+        self.mouse_ypos = 0
+        self.canvas.tag_bind(self._rect, '<Button1-Motion>', self._move)
+        self.canvas.tag_bind(self._rect, '<ButtonRelease-1>', self._release)
+
     def check_colision(self, coords):
         # TODO
         return True
@@ -35,11 +41,8 @@ class Tile(object):
             self.color = color
 
         # arbitrary mvmt
-        self.coords[0] += 1
-        self.coords[1] += 1
-
-        self.canvas.move(self._rect, self.coords[0], self.coords[1])
-        self.canvas.move(self._txt, self.coords[0], self.coords[1])
+        self.canvas.move(self._rect, 0, 0)
+        self.canvas.move(self._txt, 0, 0)
 
     def draw(self):
         bbox = bbox_coords(self.coords, self.width, self.height)
@@ -50,6 +53,24 @@ class Tile(object):
                                                 text=self.text,
                                                 font="Comic {} bold".format(self.height / 2),
                                                 fill="White")
+
+    def _move(self, event):
+        if self._moving:
+            new_xpos, new_ypos = event.x, event.y
+
+            self.canvas.move(self._rect,
+                             new_xpos - self.mouse_xpos, new_ypos - self.mouse_ypos)
+
+            self.mouse_xpos = new_xpos
+            self.mouse_ypos = new_ypos
+        else:
+            self._moving = True
+            self.canvas.tag_raise(self._rect)
+            self.mouse_xpos = event.x
+            self.mouse_ypos = event.y
+
+    def _release(self, event):
+        self._moving = False
 
 
 def bbox_coords(coords, width, height):

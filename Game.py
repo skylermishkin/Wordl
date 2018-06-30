@@ -4,9 +4,6 @@ from Tile import *
 
 
 class Game(object):
-    """
-
-    """
     def __init__(self, canvas, num_players=1, *args, **kwargs):
         """ctor
 
@@ -24,14 +21,11 @@ class Game(object):
         self.canvas.bind('<Button-1>', self._on_click)
         self.canvas.bind('<ButtonRelease-1>', self._on_release)
 
-        # game collection
+        # game's collection of stuff
         self.players = [Player(self.canvas) for _ in range(self.num_players)]
         self.board = Board(self.canvas)
-        self._background = self.canvas.create_rectangle(0, 0,
-                                                        self.canvas.winfo_width(),
-                                                        self.canvas.winfo_height(),
-                                                        fill="white")
 
+        self._setup()
         self.draw()
 
     def update(self):
@@ -41,18 +35,20 @@ class Game(object):
         for player in self.players:
             player.update()
 
-    def draw(self):
-        self.canvas.pack()
-        #self._blit()
+        self.canvas.after(10)
+        self.canvas.update()
 
+    def draw(self):
         self.board.draw()
         for player in self.players:
             player.draw()
 
-    def _blit(self):
-        self.canvas.move(self._background, 0, 0)
+    def _setup(self):
+        pass
 
     def _on_move(self, event):
+        dx = self._mousex - event.x
+        dy = self._mousey - event.y
         self._mousex, self._mousey = event.x, event.y
 
     def _on_click(self, event):
