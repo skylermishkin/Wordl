@@ -1,7 +1,3 @@
-import Tkinter as tk
-import time
-import random
-
 from Board import *
 from Player import *
 from Hand import *
@@ -12,39 +8,37 @@ class Game(object):
     """
 
     """
-    def __init__(self, canvas):
+    def __init__(self, canvas, num_players=1, *args, **kwargs):
+        """ctor
+
+        :param canvas:
+        :param num_players:
+        :param args:
+        :param kwargs:
+        """
         self.canvas = canvas
+        self.num_players = num_players
 
+        self._mousex = None
+        self._mousey = None
+        #self.canvas.bind('<Motion>', self._on_move)
+        self.canvas.bind('<Button-1>', self._on_click)
 
+        self.players = [Player(self.canvas) for _ in range(self.num_players)]
+        self.board = Board(self.canvas)
 
+        self._draw_board()
 
+    def draw(self):
+        self.canvas.pack()
+        self._draw_board()
 
+    def _draw_board(self):
+        self.canvas.create_rectangle(50, 25, 150, 75, fill="blue")
 
-"""
-    def __init__(self, master=None):
-        tk.Frame.__init__(self, master)
-        self.grid()
-        self.master.title("Grid Manager")
+    def _on_move(self, event):
+        self._mousex, self._mousey = event.x, event.y
 
-        for r in range(6):
-            self.master.rowconfigure(r, weight=1)
-        for c in range(5):
-            self.master.columnconfigure(c, weight=1)
-            tk.Button(master, text="Button {0}".format(c)).grid(row=6, column=c, sticky='ew')
-
-        Frame1 = tk.Frame(master, bg="red", width=100, height=100)
-        Frame1.grid(row=0, column=0, rowspan=3, columnspan=2, sticky='wens')
-        Frame2 = tk.Frame(master, bg="blue", width=100, height=100)
-        Frame2.grid(row=3, column=0, rowspan=3, columnspan=2, sticky='wens')
-        Frame3 = tk.Frame(master, bg="green", width=300, height=200)
-        Frame3.grid(row=0, column=2, rowspan=6, columnspan=3, sticky='wens')
-
-    def start(self):
-        root = tk.Tk()
-        board = Board(root)
-        board.pack(side="top", fill="both", expand="true", padx=4, pady=4)
-        player1 = tk.PhotoImage(data=imagedata)
-        board.addpiece("player1", player1, 1, 1)
-        root.mainloop()
-
-"""
+    def _on_click(self, event):
+        self._mousex, self._mousey = event.x, event.y
+        print "Click: {}, {}".format(self._mousex, self._mousey)

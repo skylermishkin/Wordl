@@ -1,4 +1,6 @@
 import Tkinter as tk
+import time
+
 from Game import *
 
 
@@ -30,26 +32,51 @@ Wordl design:
 """
 
 
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Globals
+WIDTH = 1000
+HEIGHT = 600
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 class WordlApp(object):
     def __init__(self):
-        #TODO: power determination,
-        # generate pool and setup board,
-        # kick off explore loop
-        # kick off consolidation and end of game
+        """ctor
 
+        """
         self.root = tk.Tk(className="  Wordl  ")
+        self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT)
 
         self._create_menus()
 
-        self.canvas = tk.Canvas(self.root)
+        # Flags for state of the game
+        self._determining_power = False
+        self._setting_board = False
+        self._exploring = False
+        self._finalizing = False
+
+        self.game = self._create_new_game()
 
         # app lifecycle
         self.persist = True
         while self.persist:
             self.root.update_idletasks()
             self.root.update()
+            self.manage()
             time.sleep(0.01)
         self.root.destroy()
+
+    def manage(self):
+        if self._determining_power:
+            pass
+        elif self._setting_board:
+            pass
+        elif self._exploring:
+            pass
+        elif self._finalizing:
+            pass
+
+        self.game.draw()
 
     def _create_menus(self):
         # instantiate a parent tk Menu
@@ -58,7 +85,7 @@ class WordlApp(object):
         # File menu pulldowns
         file_menu = tk.Menu(menu_bar)
         menu_bar.add_cascade(label="File", menu=file_menu)
-        file_menu.add_command(label="New Game", command=self._start_game)
+        file_menu.add_command(label="New Game", command=self._create_new_game)
         file_menu.add_command(label="Open...", command=self.callback)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self._quit)
@@ -70,16 +97,21 @@ class WordlApp(object):
 
         self.root.config(menu=menu_bar)
 
-    @staticmethod
-    def callback():
-        print "called the callback!"
-
     def _quit(self):
         self.root.quit()
         self.persist = False
 
-    def _start_game(self):
-        print "...well you would've started a game."
+    def _create_new_game(self):
+        print "Creating new game."
+        self._determining_power = True
+        return Game(self.canvas)
+
+
+
+
+    @staticmethod
+    def callback():
+        print "called the callback!"
 
 
 if __name__ == "__main__":

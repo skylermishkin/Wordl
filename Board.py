@@ -1,7 +1,11 @@
-import Tkinter as tk
+class Board(object):
+    def __init__(self, canvas):
+        self.canvas = canvas
 
 
-class Board(tk.Frame):
+
+
+"""
     def __init__(self, parent, rows=8, columns=8, size=92, color1="white", color2="blue"):
         '''size is the size of a square, in pixels'''
 
@@ -55,4 +59,4 @@ class Board(tk.Frame):
         for name in self.pieces:
             self.placepiece(name, self.pieces[name][0], self.pieces[name][1])
         self.canvas.tag_raise("piece")
-        self.canvas.tag_lower("square")
+        self.canvas.tag_lower("square")"""
