@@ -8,14 +8,19 @@ from Hand import *
 from Tile import *
 
 
-class Game(tk.Frame):
+class Game(object):
     """
 
     """
+    def __init__(self, canvas):
+        self.canvas = canvas
 
 
 
 
+
+
+"""
     def __init__(self, master=None):
         tk.Frame.__init__(self, master)
         self.grid()
@@ -41,3 +46,5 @@ class Game(tk.Frame):
         player1 = tk.PhotoImage(data=imagedata)
         board.addpiece("player1", player1, 1, 1)
         root.mainloop()
+
+"""

@@ -43,11 +43,13 @@ class WordlApp(object):
 
         self.canvas = tk.Canvas(self.root)
 
-        while True:
+        # app lifecycle
+        self.persist = True
+        while self.persist:
             self.root.update_idletasks()
             self.root.update()
-            #print "iter"
             time.sleep(0.01)
+        self.root.destroy()
 
     def _create_menus(self):
         # instantiate a parent tk Menu
@@ -59,7 +61,7 @@ class WordlApp(object):
         file_menu.add_command(label="New Game", command=self._start_game)
         file_menu.add_command(label="Open...", command=self.callback)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.root.quit)
+        file_menu.add_command(label="Exit", command=self._quit)
 
         # help menu pulldowns
         help_menu = tk.Menu(menu_bar)
@@ -71,6 +73,10 @@ class WordlApp(object):
     @staticmethod
     def callback():
         print "called the callback!"
+
+    def _quit(self):
+        self.root.quit()
+        self.persist = False
 
     def _start_game(self):
         print "...well you would've started a game."
