@@ -38,6 +38,7 @@ class WordlApp(object):
         self.persist = True
         while self.persist:
             self.manage()
+            self.root.after(10)
             self.root.update_idletasks()
             self.root.update()
         self.root.destroy()

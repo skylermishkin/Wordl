@@ -19,44 +19,36 @@ class Board(object):
         # canvas objects
         self._gridlings = []
         self._bg = None
-        self.tiles = []
-
-        self.letter_positions = []
+        self.tile_map = {}
 
     def setup(self):
         pool = self._generate_pool()
         print pool
-        ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
-        pos = 0
-        empty = False
-        while pos <= 60:
-            rank_picked = random.sample(ranks_to_sample, 1)[0]
-            pool_options = [l for l in pool if l in RANK_LETTERS[rank_picked]]
-            while len(pool_options) == 0:
-                ranks_to_sample = [r for r in ranks_to_sample if r != rank_picked]
-                if len(ranks_to_sample) == 0:
-                    empty = True
-                    break
-                rank_picked = random.sample(ranks_to_sample, 1)[0]
-                pool_options = [l for l in pool if l in RANK_LETTERS[rank_picked]]
-            if empty:
-                break
-            letter = random.sample(pool_options, 1)[0]
-            self.letter_positions.append((pos, letter))
-            pool.remove(letter)
-            pos += random.randint(1, 6)
-        print self.letter_positions
+        tile_positions = self._generate_tile_positions(pool)
+        print tile_positions
+        for t in tile_positions:
+            pos = t[0]
+            letter = t[1]
+            rank = [r for r in RANK_LETTERS if letter in RANK_LETTERS[r]][0]
+            self.tile_map[t] = Tile(self.canvas,
+                                    width=self.twidth,
+                                    height=self.theight,
+                                    coords=self._coords_from_pos(pos),
+                                    color=RANK_COLORS[rank],
+                                    text=letter,
+                                    frozen=True)
 
     def update(self):
-        for tile in self.tiles:
-            tile.update()
+        for t in self.tile_map:
+            self.tile_map[t].update()
 
     def create(self):
         self._create_bg()
         self._create_grid()
-        self.tiles = [Tile(self.canvas, (100, 100), self.twidth, self.theight) for _ in range(1)]
-        for tile in self.tiles:
-            tile.create()
+        #self.tiles = [Tile(self.canvas, (100, 100), self.twidth, self.theight) for _ in range(1)]
+        for t in self.tile_map:
+            self.tile_map[t].create()
+            print self.tile_map[t].coords
 
     def _create_bg(self):
         self._bg = self.canvas.create_text(self.cwidth * 0.5,
@@ -89,11 +81,51 @@ class Board(object):
                                                                              self.twidth, self.theight),
                                                                 fill="white", outline="black"))
 
+    def _coords_from_pos(self, pos):
+        x = 0
+        y = 0
+        if pos <= self.width:
+            x = pos
+        elif pos > self.width:
+            x = self.width
+            y = pos - x
+        elif pos > self.width + self.height - 1:
+            y = self.height
+            x = self.width - (pos - (self.width + self.height - 1))
+        elif pos > self.width * 2 + self.height - 2:
+            x = 0
+            y = self.height - (pos - (self.width * 2 + self.heigh - 2))
+        print x, y
+        return self.twidth + x * self.twidth, self.theight + y * self.theight
+
     def _generate_pool(self):
         pool = set()
         for rank in RANK_LETTERS:
             pool.update(set(random.sample(RANK_LETTERS[rank], RANK_POP[rank])))
         return pool
+
+    def _generate_tile_positions(self, pool):
+        tile_map = []
+        ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
+        pos = 0
+        empty = False
+        while pos <= 60:
+            rank_picked = random.sample(ranks_to_sample, 1)[0]
+            pool_options = [l for l in pool if l in RANK_LETTERS[rank_picked]]
+            while len(pool_options) == 0:
+                ranks_to_sample = [r for r in ranks_to_sample if r != rank_picked]
+                if len(ranks_to_sample) == 0:
+                    empty = True
+                    break
+                rank_picked = random.sample(ranks_to_sample, 1)[0]
+                pool_options = [l for l in pool if l in RANK_LETTERS[rank_picked]]
+            if empty:
+                break
+            letter = random.sample(pool_options, 1)[0]
+            tile_map.append((pos, letter))
+            pool.remove(letter)
+            pos += random.randint(1, 6)
+        return tile_map
 
 
 POWER_LENGTHS = {1: range(2,12),

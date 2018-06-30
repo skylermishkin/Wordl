@@ -25,8 +25,8 @@ class Game(object):
         self.players = [Player(self.canvas) for _ in range(self.num_players)]
         self.board = Board(self.canvas)
 
-        self.create()
         self.setup()
+        self.create()
 
     def update(self):
         self.canvas.pack()
