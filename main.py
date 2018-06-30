@@ -30,37 +30,43 @@ Wordl design:
 """
 
 
-class WordlApp(tk.Tk):
-    def __init__(self, *args, **kwargs):
-        tk.Tk.__init__(self, *args, **kwargs)
-        #TODO: initiate canvas,
-        # fill with power determination,
+class WordlApp(object):
+    def __init__(self):
+        #TODO: power determination,
         # generate pool and setup board,
         # kick off explore loop
         # kick off consolidation and end of game
 
-        self.menu, self.file_menu, self.help_menu = self._create_menus()
-        self.canvas = self.Canvas()
+        self.root = tk.Tk(className="  Wordl  ")
+
+        self._create_menus()
+
+        self.canvas = tk.Canvas(self.root)
+
+        while True:
+            self.root.update_idletasks()
+            self.root.update()
+            #print "iter"
+            time.sleep(0.01)
 
     def _create_menus(self):
         # instantiate a parent tk Menu
-        menu = tk.Menu(self)
-        self.config(menu=menu)
+        menu_bar = tk.Menu(self.root)
 
-        # File menu inheritance
-        file_menu = tk.Menu(menu)
-        menu.add_cascade(label="File", menu=file_menu)
-        file_menu.add_command(label="New", command=self._start_game())
-        file_menu.add_command(label="Open...", command=self.callback())
+        # File menu pulldowns
+        file_menu = tk.Menu(menu_bar)
+        menu_bar.add_cascade(label="File", menu=file_menu)
+        file_menu.add_command(label="New Game", command=self._start_game)
+        file_menu.add_command(label="Open...", command=self.callback)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self._close())
+        file_menu.add_command(label="Exit", command=self.root.quit)
 
-        # help menu inheritance
-        help_menu = tk.Menu(menu)
-        menu.add_cascade(label="Help", menu=help_menu)
-        help_menu.add_command(label="About...", command=self.callback())
+        # help menu pulldowns
+        help_menu = tk.Menu(menu_bar)
+        menu_bar.add_cascade(label="Help", menu=help_menu)
+        help_menu.add_command(label="About...", command=self.callback)
 
-        return menu, file_menu, help_menu
+        self.root.config(menu=menu_bar)
 
     @staticmethod
     def callback():
@@ -69,13 +75,7 @@ class WordlApp(tk.Tk):
     def _start_game(self):
         print "...well you would've started a game."
 
-    def _close(self):
-        print "...well you would've closed."
-
 
 if __name__ == "__main__":
-    app = WordlApp(className="  Wordl  ")
-    while True:
-        app.update_idletasks()
-        app.update()
-        time.sleep(0.01)
+    app = WordlApp()
+
