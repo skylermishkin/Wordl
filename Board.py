@@ -1,3 +1,5 @@
+import random
+
 from Tile import *
 
 
@@ -9,23 +11,59 @@ class Board(object):
         self.lr_pad = lr_pad
         self.tb_pad = tb_pad
 
-        self.twidth = (self.canvas.winfo_width() - lr_pad * 2) / (self.width + 1)
-        self.theight = (self.canvas.winfo_height() - tb_pad * 2) / (self.height + 1)
+        self.cwidth = self.canvas.winfo_width()
+        self.cheight = self.canvas.winfo_height()
+        self.twidth = (self.cwidth - lr_pad * 2) / (self.width + 1)
+        self.theight = (self.cheight - tb_pad * 2) / (self.height + 1)
 
-        # board pieces
+        # canvas objects
         self._gridlings = []
+        self._bg = None
+        self.tiles = []
 
-        # arbitrary
-        self.tiles = [Tile(self.canvas, (100, 100)) for _ in range(1)]
+        self.letter_positions = []
+
+    def setup(self):
+        pool = self._generate_pool()
+        print pool
+        ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
+        pos = 0
+        empty = False
+        while pos <= 60:
+            rank_picked = random.sample(ranks_to_sample, 1)[0]
+            pool_options = [l for l in pool if l in RANK_LETTERS[rank_picked]]
+            while len(pool_options) == 0:
+                ranks_to_sample = [r for r in ranks_to_sample if r != rank_picked]
+                if len(ranks_to_sample) == 0:
+                    empty = True
+                    break
+                rank_picked = random.sample(ranks_to_sample, 1)[0]
+                pool_options = [l for l in pool if l in RANK_LETTERS[rank_picked]]
+            if empty:
+                break
+            letter = random.sample(pool_options, 1)[0]
+            self.letter_positions.append((pos, letter))
+            pool.remove(letter)
+            pos += random.randint(1, 6)
+        print self.letter_positions
 
     def update(self):
         for tile in self.tiles:
             tile.update()
 
     def create(self):
+        self._create_bg()
         self._create_grid()
+        self.tiles = [Tile(self.canvas, (100, 100), self.twidth, self.theight) for _ in range(1)]
         for tile in self.tiles:
             tile.create()
+
+    def _create_bg(self):
+        self._bg = self.canvas.create_text(self.cwidth * 0.5,
+                                           self.cheight * 0.5,
+                                           text="Wordl",
+                                           font="Comic {} bold".format(self.cheight / 4),
+                                           fill="black")
 
     def _create_grid(self):
         # delete old gridlings; not optimal
@@ -50,3 +88,41 @@ class Board(object):
             self._gridlings.append(self.canvas.create_rectangle(*bbox_coords([pos[0]-(self.width-1)*self.twidth, pos[1]],
                                                                              self.twidth, self.theight),
                                                                 fill="white", outline="black"))
+
+    def _generate_pool(self):
+        pool = set()
+        for rank in RANK_LETTERS:
+            pool.update(set(random.sample(RANK_LETTERS[rank], RANK_POP[rank])))
+        return pool
+
+
+POWER_LENGTHS = {1: range(2,12),
+                 2: range(12,17),
+                 3: range(17,22),
+                 4: range(22,27),
+                 5: range(27,33),
+                 6: range(33,65)}
+
+RANK_COLORS = {0: "blue",
+               1: "green",
+               2: "red",
+               3: "black",
+               4: "purple"}
+
+RANK_LETTERS = {0: {"A", "E"},
+                1: {"I", "L", "O", "N", "S", "R", "T"},
+                2: {"C", "D", "G", "H", "M", "P", "U"},
+                3: {"B", "F", "K", "W", "Y"},
+                4: {"J", "Q", "V", "X", "Z"}}
+
+RANK_POP = {0: 2,
+            1: 4,
+            2: 4,
+            3: 2,
+            4: 2}
+
+RANK_WEIGHT = {0: float(RANK_POP[0]) / sum(RANK_POP.values()),
+               1: float(RANK_POP[1]) / sum(RANK_POP.values()),
+               2: float(RANK_POP[2]) / sum(RANK_POP.values()),
+               3: float(RANK_POP[3]) / sum(RANK_POP.values()),
+               4: float(RANK_POP[4]) / sum(RANK_POP.values())}

@@ -21,12 +21,12 @@ class Game(object):
         self.canvas.bind('<Button-1>', self._on_click)
         self.canvas.bind('<ButtonRelease-1>', self._on_release)
 
-        # game's collection of stuff
+        # canvas objects
         self.players = [Player(self.canvas) for _ in range(self.num_players)]
         self.board = Board(self.canvas)
 
-        self._setup()
         self.create()
+        self.setup()
 
     def update(self):
         self.canvas.pack()
@@ -43,8 +43,10 @@ class Game(object):
         for player in self.players:
             player.create()
 
-    def _setup(self):
-        pass
+    def setup(self):
+        self.board.setup()
+        for player in self.players:
+            player.setup()
 
     def _on_move(self, event):
         dx = self._mousex - event.x

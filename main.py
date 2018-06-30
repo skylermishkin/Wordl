@@ -21,8 +21,6 @@ class WordlApp(object):
 
         self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, highlightthickness=0, background="white")
         self.canvas.pack()
-        self.canvas.after(10)
-
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
         self.canvas.bind("<Configure>", self._on_resize)
@@ -99,6 +97,7 @@ class WordlApp(object):
         # resize the canvas
         self.canvas.config(width=self.cwidth, height=self.cheight)
         # rescale all the objects tagged with the "all" tag
+        # TODO: this needs to also scal text size
         self.canvas.scale("all", 0, 0, wscale, hscale)
 
 
