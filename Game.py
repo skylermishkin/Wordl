@@ -26,7 +26,7 @@ class Game(object):
         self.board = Board(self.canvas)
 
         self._setup()
-        self.draw()
+        self.create()
 
     def update(self):
         self.canvas.pack()
@@ -38,10 +38,10 @@ class Game(object):
         self.canvas.after(10)
         self.canvas.update()
 
-    def draw(self):
-        self.board.draw()
+    def create(self):
+        self.board.create()
         for player in self.players:
-            player.draw()
+            player.create()
 
     def _setup(self):
         pass

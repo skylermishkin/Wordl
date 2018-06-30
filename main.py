@@ -21,6 +21,7 @@ class WordlApp(object):
 
         self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, highlightthickness=0, background="white")
         self.canvas.pack()
+        self.canvas.after(10)
 
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
@@ -38,9 +39,9 @@ class WordlApp(object):
         # app lifecycle
         self.persist = True
         while self.persist:
+            self.manage()
             self.root.update_idletasks()
             self.root.update()
-            self.manage()
         self.root.destroy()
 
     def manage(self):

@@ -18,18 +18,16 @@ class Board(object):
         # arbitrary
         self.tiles = [Tile(self.canvas, (100, 100)) for _ in range(1)]
 
-        self.draw()
-
     def update(self):
         for tile in self.tiles:
             tile.update()
 
-    def draw(self):
-        self._draw_grid()
+    def create(self):
+        self._create_grid()
         for tile in self.tiles:
-            tile.draw()
+            tile.create()
 
-    def _draw_grid(self):
+    def _create_grid(self):
         # delete old gridlings; not optimal
         for g in self._gridlings:
             self.canvas.delete(g)

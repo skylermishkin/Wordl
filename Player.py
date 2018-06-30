@@ -2,10 +2,10 @@ class Player(object):
     def __init__(self, canvas, *args, **kwargs):
         self.canvas = canvas
 
-        self.draw()
+        self.create()
 
     def update(self):
         pass
 
-    def draw(self):
+    def create(self):
         pass

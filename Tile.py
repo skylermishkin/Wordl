@@ -22,13 +22,9 @@ class Tile(object):
         self._rect = None
         self._txt = None
 
-        self.draw()
-
         self._moving = False
         self.mouse_xpos = 0
         self.mouse_ypos = 0
-        self.canvas.tag_bind(self._rect, '<Button1-Motion>', self._move)
-        self.canvas.tag_bind(self._rect, '<ButtonRelease-1>', self._release)
 
     def check_colision(self, coords):
         # TODO
@@ -44,7 +40,7 @@ class Tile(object):
         self.canvas.move(self._rect, 0, 0)
         self.canvas.move(self._txt, 0, 0)
 
-    def draw(self):
+    def create(self):
         bbox = bbox_coords(self.coords, self.width, self.height)
         self._rect = self.canvas.create_rectangle(*bbox, fill=self.color)
         if self.text is not None:
@@ -52,17 +48,17 @@ class Tile(object):
                                                 self.coords[1] + self.height * 0.5,
                                                 text=self.text,
                                                 font="Comic {} bold".format(self.height / 2),
-                                                fill="White")
+                                                fill="black")
+        # drag binding
+        self.canvas.tag_bind(self._rect, '<Button1-Motion>', self._drag)
+        self.canvas.tag_bind(self._rect, '<ButtonRelease-1>', self._release)
 
-    def _move(self, event):
+    def _drag(self, event):
         if self._moving:
-            new_xpos, new_ypos = event.x, event.y
-
-            self.canvas.move(self._rect,
-                             new_xpos - self.mouse_xpos, new_ypos - self.mouse_ypos)
-
-            self.mouse_xpos = new_xpos
-            self.mouse_ypos = new_ypos
+            new_x, new_y = event.x, event.y
+            self._move(new_x, new_y)
+            self.mouse_xpos = new_x
+            self.mouse_ypos = new_y
         else:
             self._moving = True
             self.canvas.tag_raise(self._rect)
@@ -71,6 +67,12 @@ class Tile(object):
 
     def _release(self, event):
         self._moving = False
+    
+    def _move(self, new_x, new_y):
+        self.canvas.move(self._rect,
+                         new_x - self.mouse_xpos, new_y - self.mouse_ypos)
+        self.canvas.move(self._txt,
+                         new_x - self.mouse_xpos, new_y - self.mouse_ypos)
 
 
 def bbox_coords(coords, width, height):
