@@ -4,34 +4,6 @@ import time
 from Game import *
 
 
-"""
-Wordl design:
-    menu provides interface to restart and other features
-    display: graphics via Tkinter
-    player:
-        methods for managing collection of tiles
-            orders (grid snap?)
-            dictionary validation/highlighting
-        methods for drawing to the canvas
-            collection
-            board position
-    board:
-        methods for managing state
-            pool tiles, token tiles
-        methods for drawing to the display
-            board skeleton, tile positions
-    Game:
-        determine power methods
-        generate pool methods
-        set board methods
-        explore loop
-            turn methods
-            round methods
-        methods for managing state
-        
-"""
-
-
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Globals
 WIDTH = 1000
@@ -86,14 +58,14 @@ class WordlApp(object):
         file_menu = tk.Menu(menu_bar)
         menu_bar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="New Game", command=self._create_new_game)
-        file_menu.add_command(label="Open...", command=self.callback)
+        file_menu.add_command(label="Open...", command=self._open_map)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self._quit)
 
         # help menu pulldowns
         help_menu = tk.Menu(menu_bar)
         menu_bar.add_cascade(label="Help", menu=help_menu)
-        help_menu.add_command(label="About...", command=self.callback)
+        help_menu.add_command(label="About...", command=self._about_wordl)
 
         self.root.config(menu=menu_bar)
 
@@ -106,12 +78,11 @@ class WordlApp(object):
         self._determining_power = True
         return Game(self.canvas)
 
+    def _about_wordl(self, event):
+        print "It's chill"
 
-
-
-    @staticmethod
-    def callback():
-        print "called the callback!"
+    def _open_map(self, event):
+        print "You are not ready yet"
 
 
 if __name__ == "__main__":
