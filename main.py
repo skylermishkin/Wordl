@@ -17,7 +17,10 @@ class WordlApp(object):
 
         """
         self.root = tk.Tk(className="  Wordl  ")
-        self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT)
+        self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, highlightthickness=0)
+        self.cwidth = self.canvas.winfo_reqwidth()
+        self.cheight = self.canvas.winfo_reqheight()
+        self.canvas.bind("<Configure>", self._on_resize)
 
         self._create_menus()
 
@@ -27,7 +30,8 @@ class WordlApp(object):
         self._exploring = False
         self._finalizing = False
 
-        self.game = self._create_new_game()
+        self.game = None
+        self._create_new_game()
 
         # app lifecycle
         self.persist = True
@@ -47,8 +51,8 @@ class WordlApp(object):
             pass
         elif self._finalizing:
             pass
-
-        self.game.draw()
+        self.canvas.pack()
+        self.game.update()
 
     def _create_menus(self):
         # instantiate a parent tk Menu
@@ -75,14 +79,25 @@ class WordlApp(object):
 
     def _create_new_game(self):
         print "Creating new game."
+        self.game = None
         self._determining_power = True
-        return Game(self.canvas)
+        self.game = Game(self.canvas)
 
-    def _about_wordl(self, event):
+    def _about_wordl(self, *event):
         print "It's chill"
 
-    def _open_map(self, event):
+    def _open_map(self, *event):
         print "You are not ready yet"
+
+    def _on_resize(self, event):
+        wscale = float(event.width) / self.cwidth
+        hscale = float(event.height) / self.cheight
+        self.cwidth = event.width
+        self.cheight = event.height
+        # resize the canvas
+        self.canvas.config(width=self.cwidth, height=self.cheight)
+        # rescale all the objects tagged with the "all" tag
+        self.canvas.scale("all", 0, 0, wscale, hscale)
 
 
 if __name__ == "__main__":

@@ -18,31 +18,39 @@ class Game(object):
         self.canvas = canvas
         self.num_players = num_players
 
-        # setup mouse
+        # setup mouse handling
         self._mousex = None
         self._mousey = None
         self.canvas.bind('<Button-1>', self._on_click)
         self.canvas.bind('<ButtonRelease-1>', self._on_release)
 
+        # game collection
         self.players = [Player(self.canvas) for _ in range(self.num_players)]
         self.board = Board(self.canvas)
+        self._background = self.canvas.create_rectangle(0, 0,
+                                                        self.canvas.winfo_width(),
+                                                        self.canvas.winfo_height(),
+                                                        fill="white")
 
         self.draw()
 
+    def update(self):
+        self.canvas.pack()
+
+        self.board.update()
+        for player in self.players:
+            player.update()
+
     def draw(self):
         self.canvas.pack()
-        self._blit()
+        #self._blit()
 
         self.board.draw()
         for player in self.players:
             player.draw()
 
     def _blit(self):
-        self.canvas.create_rectangle(0,
-                                     0,
-                                     self.canvas.winfo_width(),
-                                     self.canvas.winfo_height(),
-                                     fill="white")
+        self.canvas.move(self._background, 0, 0)
 
     def _on_move(self, event):
         self._mousex, self._mousey = event.x, event.y
