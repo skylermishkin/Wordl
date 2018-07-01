@@ -1,16 +1,27 @@
 import random
 
 from Tile import *
+from Player import *
 from settings import *
 
 
 class Board(object):
-    def __init__(self, canvas, width=20, height=10, tb_pad=20, lr_pad=50, *args, **kwargs):
+    def __init__(self, canvas, width=20, height=10, tb_pad=20, lr_pad=50, num_players=1, *args, **kwargs):
+        """ctor
+
+        :param canvas:
+        :param width: num tiles wide
+        :param height:  num tiles high
+        :param tb_pad:
+        :param lr_pad:
+        :param num_players:
+        """
         self.canvas = canvas
         self.width = width
         self.height = height
         self.lr_pad = lr_pad
         self.tb_pad = tb_pad
+        self.num_players = num_players
 
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
@@ -19,7 +30,9 @@ class Board(object):
 
         # canvas objects
         self._pathlings = []  # list of rects used to make the board path
-        self._hand = []  # list of Tile()s
+        self._players = [Player(canvas,
+                                self._pxcoords_from_coords(i, 0),
+                                diameter=self.theight) for i in range(self.num_players)]
         self.tile_map = {}  # {(pos, letter): Tile(), ...}
 
     def setup(self):
@@ -42,19 +55,22 @@ class Board(object):
     def update(self):
         for t in self.tile_map:
             self.tile_map[t].update()
+        for p in self._players:
+            p.update()
 
     def create(self):
-        self._create_grid()
+        self._create_path()
         for t in self.tile_map:
             self.tile_map[t].create()
+        for p in self._players:
+            p.create()
 
-    def _create_grid(self):
-        print("creating the board grid")
-        # delete old gridlings; not optimal
+    def _create_path(self):
+        # delete old pathlings; not optimal
         for g in self._pathlings:
             self.canvas.delete(g)
         # iterate through positions on the board and print a rectangle
-        for pos in range(1, self.width * 2 + self.height * 2 + 1):
+        for pos in range(self.width * 2 + self.height * 2):
             self._pathlings.append(self.canvas.create_rectangle(*bbox_coords(self._coords_from_pos(pos),
                                                                              self.twidth, self.theight),
                                                                 fill="white", outline="black"))
@@ -63,7 +79,7 @@ class Board(object):
         """
 
         :param int pos: 1-based positioning
-        :return x, y: x y integer coordinates
+        :return x, y: x y integer coordinates on the board grid
         """
         x = 0
         y = 0
@@ -84,10 +100,11 @@ class Board(object):
         return self._pxcoords_from_coords(x, y)
 
     def _pxcoords_from_coords(self, x, y):
-        return x * self.twidth + self.lr_pad, y * self.theight + self.tb_pad
+        return x * self.twidth + self.lr_pad, (1 + y) * self.theight + self.tb_pad
 
     @staticmethod
     def _generate_pool():
+        # Requires variables from settings.py to be locally available
         pool = set()
         for rank in RANK_LETTERS:
             pool.update(set(random.sample(RANK_LETTERS[rank], RANK_POP[rank])))
@@ -97,7 +114,7 @@ class Board(object):
     def _generate_tile_positions(pool):
         tile_map = []
         ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
-        pos = 1
+        pos = 0
         empty = False
         while pos <= 60:
             rank_picked = random.sample(ranks_to_sample, 1)[0]

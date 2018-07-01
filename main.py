@@ -8,6 +8,14 @@ from Game import *
 from settings import *
 
 
+# hack to draw circles
+def _create_circle(self, x, y, r, **kwargs):
+    return self.create_oval(x - r, y - r, x + r, y + r, **kwargs)
+
+
+tk.Canvas.create_circle = _create_circle
+
+
 class WordlApp(object):
     def __init__(self):
         """ctor

@@ -1,6 +1,6 @@
-from settings import *
-
 import random
+
+from settings import *
 
 
 class Tile(object):
@@ -45,8 +45,8 @@ class Tile(object):
         bbox = bbox_coords(self.coords, self.width, self.height)
         self._rect = self.canvas.create_rectangle(*bbox, fill=self.color, outline="black")
         if self.text is not None:
-            self._txt = self.canvas.create_text(self.coords[0] + self.width * 0.5,
-                                                self.coords[1] + self.height * 0.5,
+            self._txt = self.canvas.create_text(self.coords[0],
+                                                self.coords[1],
                                                 text=self.text,
                                                 font="Comic {} bold".format(int(self.height / 2)),
                                                 fill="white")
@@ -105,7 +105,7 @@ class Tile(object):
 
 
 def bbox_coords(coords, width, height):
-    return (coords[0],
-            coords[1],
-            coords[0] + width,
-            coords[1] + height,)
+    return (coords[0] - width * 0.5,
+            coords[1] - height * 0.5,
+            coords[0] + width * 0.5,
+            coords[1] + height * 0.5,)
