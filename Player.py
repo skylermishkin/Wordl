@@ -32,8 +32,9 @@ class Player(object):
     def setup(self):
         pass
 
-    def move(self, pos):
+    def move(self, coords):
         """ Moves player to the given position.
 
-        :param pos:
+        :param coords: (x, y) pixel coordinates
         """
+        self.coords = coords

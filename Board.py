@@ -35,6 +35,8 @@ class Board(object):
                                 diameter=self.theight) for i in range(self.num_players)]
         self.tile_map = {}  # {(pos, letter): Tile(), ...}
 
+        self._add_listeners()
+
     def setup(self):
         pool = self._generate_pool()
         print("Pool: ", pool)
@@ -66,7 +68,7 @@ class Board(object):
             p.create()
 
     def _create_path(self):
-        # delete old pathlings; not optimal
+        # delete old pathlings; not optimal, maybe not required
         for g in self._pathlings:
             self.canvas.delete(g)
         # iterate through positions on the board and print a rectangle
@@ -75,8 +77,12 @@ class Board(object):
                                                                              self.twidth, self.theight),
                                                                 fill="white", outline="black"))
 
+    def _add_listeners(self):
+        pass
+
     def _coords_from_pos(self, pos):
-        """
+        """ Converts 0-based integer position on the path to a 0-based integer 2d coordinate.
+        0,0 coordinate corresponding to the upper left most position (0).
 
         :param int pos: 1-based positioning
         :return x, y: x y integer coordinates on the board grid
@@ -100,6 +106,13 @@ class Board(object):
         return self._pxcoords_from_coords(x, y)
 
     def _pxcoords_from_coords(self, x, y):
+        """ Given integer 2d coordinates (from _coords_from_pos), return the pixel coordinates
+        (for passing to canvas stuff).
+
+        :param int x:
+        :param int y:
+        :return px_x, px_y: the pixel coordinates
+        """
         return x * self.twidth + self.lr_pad, (1 + y) * self.theight + self.tb_pad
 
     @staticmethod
