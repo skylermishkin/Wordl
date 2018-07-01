@@ -1,4 +1,7 @@
-import Tkinter as tk
+try:
+    import Tkinter as tk
+except:
+    import tkinter as tk
 import time
 
 from Game import *
@@ -78,17 +81,17 @@ class WordlApp(object):
         self.persist = False
 
     def _create_new_game(self):
-        print "Creating new game."
+        print("Creating new game.")
         self.canvas.delete("all")
         self.game = None
         self.game = Game(self.canvas)
         self._determining_power = True
 
     def _about_wordl(self, *event):
-        print "It's chill"
+        print("It's chill")
 
     def _open_map(self, *event):
-        print "You are not ready yet"
+        print("You are not ready yet")
 
     def _on_resize(self, event):
         wscale = float(event.width) / self.cwidth

@@ -55,8 +55,8 @@ class Game(object):
 
     def _on_click(self, event):
         self._mousex, self._mousey = event.x, event.y
-        print "Click: {}, {}".format(self._mousex, self._mousey)
+        print("Click: {}, {}".format(self._mousex, self._mousey))
 
     def _on_release(self, event):
         self._mousex, self._mousey = event.x, event.y
-        print "Release: {}, {}".format(self._mousex, self._mousey)
+        print("Release: {}, {}".format(self._mousex, self._mousey))

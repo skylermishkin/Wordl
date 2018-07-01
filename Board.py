@@ -23,9 +23,9 @@ class Board(object):
 
     def setup(self):
         pool = self._generate_pool()
-        print pool
+        print(pool)
         tile_positions = self._generate_tile_positions(pool)
-        print tile_positions
+        print(tile_positions)
         for t in tile_positions:
             pos = t[0]
             letter = t[1]
@@ -48,7 +48,7 @@ class Board(object):
         #self.tiles = [Tile(self.canvas, (100, 100), self.twidth, self.theight) for _ in range(1)]
         for t in self.tile_map:
             self.tile_map[t].create()
-            print self.tile_map[t].coords
+            print(self.tile_map[t].coords)
 
     def _create_bg(self):
         self._bg = self.canvas.create_text(self.cwidth * 0.5,
@@ -95,7 +95,7 @@ class Board(object):
         elif pos > self.width * 2 + self.height - 2:
             x = 0
             y = self.height - (pos - (self.width * 2 + self.heigh - 2))
-        print x, y
+        print(x, y)
         return self.twidth + x * self.twidth, self.theight + y * self.theight
 
     def _generate_pool(self):
