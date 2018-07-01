@@ -1,6 +1,7 @@
 import random
 
 from Tile import *
+from util import *
 
 
 class Board(object):
@@ -11,8 +12,8 @@ class Board(object):
         self.lr_pad = lr_pad
         self.tb_pad = tb_pad
 
-        self.cwidth = self.canvas.winfo_width()
-        self.cheight = self.canvas.winfo_height()
+        self.cwidth = self.canvas.winfo_reqwidth()
+        self.cheight = self.canvas.winfo_reqheight()
         self.twidth = (self.cwidth - lr_pad * 2) / (self.width + 1)
         self.theight = (self.cheight - tb_pad * 2) / (self.height + 1)
 
@@ -54,7 +55,7 @@ class Board(object):
         self._bg = self.canvas.create_text(self.cwidth * 0.5,
                                            self.cheight * 0.5,
                                            text="Wordl",
-                                           font="Comic {} bold".format(self.cheight / 4),
+                                           font="Comic {} bold".format(int(self.cheight / 4)),
                                            fill="black")
 
     def _create_grid(self):
@@ -84,6 +85,7 @@ class Board(object):
     def _coords_from_pos(self, pos):
         x = 0
         y = 0
+        # width is actually 19... check dat out yo
         if pos <= self.width:
             x = pos
         elif pos > self.width:
@@ -91,12 +93,12 @@ class Board(object):
             y = pos - x
         elif pos > self.width + self.height - 1:
             y = self.height
-            x = self.width - (pos - (self.width + self.height - 1))
+            x = self.width - (self.width - (pos - (self.width + self.height - 1)))
         elif pos > self.width * 2 + self.height - 2:
             x = 0
-            y = self.height - (pos - (self.width * 2 + self.heigh - 2))
-        print(x, y)
-        return self.twidth + x * self.twidth, self.theight + y * self.theight
+            y = self.height - (self.height - (pos - (self.width * 2 + self.height - 2)))
+        print(pos, x, y)
+        return (0 + x) * self.twidth + self.lr_pad, (0 + y) * self.theight + self.tb_pad
 
     def _generate_pool(self):
         pool = set()
@@ -107,7 +109,7 @@ class Board(object):
     def _generate_tile_positions(self, pool):
         tile_map = []
         ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
-        pos = 0
+        pos = 1
         empty = False
         while pos <= 60:
             rank_picked = random.sample(ranks_to_sample, 1)[0]
@@ -126,35 +128,3 @@ class Board(object):
             pool.remove(letter)
             pos += random.randint(1, 6)
         return tile_map
-
-
-POWER_LENGTHS = {1: range(2,12),
-                 2: range(12,17),
-                 3: range(17,22),
-                 4: range(22,27),
-                 5: range(27,33),
-                 6: range(33,65)}
-
-RANK_COLORS = {0: "blue",
-               1: "green",
-               2: "red",
-               3: "black",
-               4: "purple"}
-
-RANK_LETTERS = {0: {"A", "E"},
-                1: {"I", "L", "O", "N", "S", "R", "T"},
-                2: {"C", "D", "G", "H", "M", "P", "U"},
-                3: {"B", "F", "K", "W", "Y"},
-                4: {"J", "Q", "V", "X", "Z"}}
-
-RANK_POP = {0: 2,
-            1: 4,
-            2: 4,
-            3: 2,
-            4: 2}
-
-RANK_WEIGHT = {0: float(RANK_POP[0]) / sum(RANK_POP.values()),
-               1: float(RANK_POP[1]) / sum(RANK_POP.values()),
-               2: float(RANK_POP[2]) / sum(RANK_POP.values()),
-               3: float(RANK_POP[3]) / sum(RANK_POP.values()),
-               4: float(RANK_POP[4]) / sum(RANK_POP.values())}

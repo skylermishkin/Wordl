@@ -23,13 +23,13 @@ class WordlApp(object):
         self._create_menus()
 
         self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, highlightthickness=0, background="white")
-        self.canvas.pack()
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
         self.canvas.bind("<Configure>", self._on_resize)
 
         self.game = None
         self._create_new_game()
+        self.canvas.pack()
 
         # Flags for state of the game
         self._determining_power = False

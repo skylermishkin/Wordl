@@ -1,3 +1,5 @@
+from util import *
+
 class Tile(object):
     def __init__(self, canvas, coords, width=100, height=100, color="blue", text="A", frozen=False,
                  *args, **kwargs):
@@ -43,7 +45,7 @@ class Tile(object):
             self._txt = self.canvas.create_text(self.coords[0] + self.width * 0.5,
                                                 self.coords[1] + self.height * 0.5,
                                                 text=self.text,
-                                                font="Comic {} bold".format(self.height / 2),
+                                                font="Comic {} bold".format(int(self.height / 2)),
                                                 fill="white")
         self._start_bindings()
 

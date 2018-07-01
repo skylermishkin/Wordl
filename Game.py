@@ -1,6 +1,7 @@
 from Board import *
 from Player import *
 from Tile import *
+from util import *
 
 
 class Game(object):
@@ -29,8 +30,6 @@ class Game(object):
         self.create()
 
     def update(self):
-        self.canvas.pack()
-
         self.board.update()
         for player in self.players:
             player.update()
@@ -49,8 +48,6 @@ class Game(object):
             player.setup()
 
     def _on_move(self, event):
-        dx = self._mousex - event.x
-        dy = self._mousey - event.y
         self._mousex, self._mousey = event.x, event.y
 
     def _on_click(self, event):
