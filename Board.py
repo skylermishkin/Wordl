@@ -18,15 +18,15 @@ class Board(object):
         self.theight = (self.cheight - tb_pad * 2) / (self.height + 2)
 
         # canvas objects
-        self._gridlings = []
-        self._bg = None
-        self.tile_map = {}
+        self._pathlings = []  # list of rects used to make the board path
+        self._hand = []  # list of Tile()s
+        self.tile_map = {}  # {(pos, letter): Tile(), ...}
 
     def setup(self):
         pool = self._generate_pool()
-        print(pool)
+        print("Pool: ", pool)
         tile_positions = self._generate_tile_positions(pool)
-        print(tile_positions)
+        print("Tile map:", tile_positions)
         for t in tile_positions:
             pos = t[0]
             letter = t[1]
@@ -44,27 +44,18 @@ class Board(object):
             self.tile_map[t].update()
 
     def create(self):
-        self._create_bg()
         self._create_grid()
         for t in self.tile_map:
             self.tile_map[t].create()
 
-    def _create_bg(self):
-        # Print wordl in the background
-        self._bg = self.canvas.create_text(self.cwidth * 0.5,
-                                           self.cheight * 0.5,
-                                           text="Wordl",
-                                           font="Comic {} bold".format(int(self.cheight / 4)),
-                                           fill="black")
-
     def _create_grid(self):
         print("creating the board grid")
         # delete old gridlings; not optimal
-        for g in self._gridlings:
+        for g in self._pathlings:
             self.canvas.delete(g)
         # iterate through positions on the board and print a rectangle
         for pos in range(1, self.width * 2 + self.height * 2 + 1):
-            self._gridlings.append(self.canvas.create_rectangle(*bbox_coords(self._coords_from_pos(pos),
+            self._pathlings.append(self.canvas.create_rectangle(*bbox_coords(self._coords_from_pos(pos),
                                                                              self.twidth, self.theight),
                                                                 fill="white", outline="black"))
 
@@ -90,15 +81,20 @@ class Board(object):
         if pos > prior_corner_pos:
             x = 0
             y = self.height - (pos - prior_corner_pos)
-        return (0 + x) * self.twidth + self.lr_pad, (0 + y) * self.theight + self.tb_pad
+        return self._pxcoords_from_coords(x, y)
 
-    def _generate_pool(self):
+    def _pxcoords_from_coords(self, x, y):
+        return x * self.twidth + self.lr_pad, y * self.theight + self.tb_pad
+
+    @staticmethod
+    def _generate_pool():
         pool = set()
         for rank in RANK_LETTERS:
             pool.update(set(random.sample(RANK_LETTERS[rank], RANK_POP[rank])))
         return pool
 
-    def _generate_tile_positions(self, pool):
+    @staticmethod
+    def _generate_tile_positions(pool):
         tile_map = []
         ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
         pos = 1

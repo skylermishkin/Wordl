@@ -21,6 +21,8 @@ RANK_LETTERS = {0: {"A", "E"},
                 3: {"B", "F", "K", "W", "Y"},
                 4: {"J", "Q", "V", "X", "Z"}}
 
+LETTER_RANK = {letter: rank for rank in RANK_LETTERS for letter in RANK_LETTERS[rank]}
+
 RANK_POP = {0: 2,
             1: 4,
             2: 4,

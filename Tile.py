@@ -1,5 +1,8 @@
 from settings import *
 
+import random
+
+
 class Tile(object):
     def __init__(self, canvas, coords, width=100, height=100, color="blue", text="A", frozen=False,
                  *args, **kwargs):
@@ -55,6 +58,10 @@ class Tile(object):
         self.canvas.tag_bind(self._rect, '<ButtonRelease-1>', self.release)
         self.canvas.tag_bind(self._txt, '<Button1-Motion>', self.drag)
         self.canvas.tag_bind(self._txt, '<ButtonRelease-1>', self.release)
+        # re-roll binding
+        if self._frozen:
+            self.canvas.tag_bind(self._rect, '<Double-Button-1>', self._reroll)
+            self.canvas.tag_bind(self._txt, '<Double-Button-1>', self._reroll)
 
     def drag(self, event):
         if self._moving:
@@ -79,6 +86,22 @@ class Tile(object):
         self.canvas.move(self._txt,
                          new_x - self.mouse_xpos, new_y - self.mouse_ypos)
         self.canvas.after(10)
+
+    def _reroll(self, event):
+        """ Replaces a tile with one that's another letter from the same rank.
+        """
+        print("Re-rolling")
+        rank = LETTER_RANK[self.text]
+        replacement_options = {repl for repl in RANK_LETTERS[rank] if repl != self.text}
+        repl_letter = random.sample(replacement_options, 1)[0]
+        self.text = repl_letter
+        self.canvas.delete(self._txt)
+        self._txt = self.canvas.create_text(self.coords[0] + self.width * 0.5,
+                                            self.coords[1] + self.height * 0.5,
+                                            text=self.text,
+                                            font="Comic {} bold".format(int(self.height / 2)),
+                                            fill="white")
+        self._start_bindings()
 
 
 def bbox_coords(coords, width, height):
