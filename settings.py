@@ -1,3 +1,7 @@
+# Global settings and data for the game
+WIDTH = 1000
+HEIGHT = 600
+
 POWER_LENGTHS = {1: range(2,12),
                  2: range(12,17),
                  3: range(17,22),

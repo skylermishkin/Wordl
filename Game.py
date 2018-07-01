@@ -1,7 +1,7 @@
 from Board import *
 from Player import *
 from Tile import *
-from util import *
+from settings import *
 
 
 class Game(object):

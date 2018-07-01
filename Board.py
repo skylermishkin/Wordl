@@ -1,11 +1,11 @@
 import random
 
 from Tile import *
-from util import *
+from settings import *
 
 
 class Board(object):
-    def __init__(self, canvas, width=20, height=10, tb_pad=20, lr_pad=20, *args, **kwargs):
+    def __init__(self, canvas, width=20, height=10, tb_pad=20, lr_pad=50, *args, **kwargs):
         self.canvas = canvas
         self.width = width
         self.height = height
@@ -15,7 +15,7 @@ class Board(object):
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
         self.twidth = (self.cwidth - lr_pad * 2) / (self.width + 1)
-        self.theight = (self.cheight - tb_pad * 2) / (self.height + 1)
+        self.theight = (self.cheight - tb_pad * 2) / (self.height + 2)
 
         # canvas objects
         self._gridlings = []
@@ -46,12 +46,11 @@ class Board(object):
     def create(self):
         self._create_bg()
         self._create_grid()
-        #self.tiles = [Tile(self.canvas, (100, 100), self.twidth, self.theight) for _ in range(1)]
         for t in self.tile_map:
             self.tile_map[t].create()
-            print(self.tile_map[t].coords)
 
     def _create_bg(self):
+        # Print wordl in the background
         self._bg = self.canvas.create_text(self.cwidth * 0.5,
                                            self.cheight * 0.5,
                                            text="Wordl",
@@ -59,45 +58,38 @@ class Board(object):
                                            fill="black")
 
     def _create_grid(self):
+        print("creating the board grid")
         # delete old gridlings; not optimal
         for g in self._gridlings:
             self.canvas.delete(g)
-
-        pos = [self.lr_pad, self.tb_pad]
-
-        # top and bottom
-        for i in range(self.width):
-            pos[0] += self.twidth
-            self._gridlings.append(self.canvas.create_rectangle(*bbox_coords(pos, self.twidth, self.theight),
-                                                                fill="white", outline="black"))
-            self._gridlings.append(self.canvas.create_rectangle(*bbox_coords([pos[0], pos[1]+self.height*self.theight],
-                                                                             self.twidth, self.theight),
-                                                                fill="white", outline="black"))
-        # right and left
-        for i in range(self.height - 1, 0, -1):
-            pos[1] += self.theight
-            self._gridlings.append(self.canvas.create_rectangle(*bbox_coords(pos, self.twidth, self.theight),
-                                                                fill="white", outline="black"))
-            self._gridlings.append(self.canvas.create_rectangle(*bbox_coords([pos[0]-(self.width-1)*self.twidth, pos[1]],
+        # iterate through positions on the board and print a rectangle
+        for pos in range(1, self.width * 2 + self.height * 2 + 1):
+            self._gridlings.append(self.canvas.create_rectangle(*bbox_coords(self._coords_from_pos(pos),
                                                                              self.twidth, self.theight),
                                                                 fill="white", outline="black"))
 
     def _coords_from_pos(self, pos):
+        """
+
+        :param int pos: 1-based positioning
+        :return x, y: x y integer coordinates
+        """
         x = 0
         y = 0
-        # width is actually 19... check dat out yo
+        prior_corner_pos = self.width
         if pos <= self.width:
             x = pos
-        elif pos > self.width:
+        elif pos > prior_corner_pos:
             x = self.width
-            y = pos - x
-        elif pos > self.width + self.height - 1:
+            y = pos - prior_corner_pos
+            prior_corner_pos = self.width + self.height
+        if pos > prior_corner_pos:
             y = self.height
-            x = self.width - (self.width - (pos - (self.width + self.height - 1)))
-        elif pos > self.width * 2 + self.height - 2:
+            x = self.width - (pos - prior_corner_pos)
+            prior_corner_pos = self.width * 2 + self.height
+        if pos > prior_corner_pos:
             x = 0
-            y = self.height - (self.height - (pos - (self.width * 2 + self.height - 2)))
-        print(pos, x, y)
+            y = self.height - (pos - prior_corner_pos)
         return (0 + x) * self.twidth + self.lr_pad, (0 + y) * self.theight + self.tb_pad
 
     def _generate_pool(self):

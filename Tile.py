@@ -1,4 +1,4 @@
-from util import *
+from settings import *
 
 class Tile(object):
     def __init__(self, canvas, coords, width=100, height=100, color="blue", text="A", frozen=False,

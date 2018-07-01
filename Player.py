@@ -1,4 +1,4 @@
-from util import *
+from settings import *
 
 
 class Player(object):

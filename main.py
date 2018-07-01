@@ -5,13 +5,7 @@ except:
 import time
 
 from Game import *
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Globals
-WIDTH = 1000
-HEIGHT = 600
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+from settings import *
 
 
 class WordlApp(object):
