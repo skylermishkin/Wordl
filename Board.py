@@ -39,8 +39,8 @@ class Board(object):
         self._players = [[Player(canvas,
                                  self.grid.pxcoords_from_coords((i, 0)),  # this will break if you have more than width players
                                  diameter=self.theight*0.5,),
-                          i] for i in range(self.num_players)]  # [[Player(), pos], ...]
-        self.tile_map = {}  # {(pos, letter): Tile(), ...}
+                          i] for i in range(self.num_players)]  # [[Player(), pos], ...] TODO update to self.players = {Player: pos}
+        self.tile_map = {}  # {pos: Tile(), ...}
         self._active_hand = None
 
         self._add_listeners()
@@ -48,13 +48,13 @@ class Board(object):
     def setup(self):
         pool = self._generate_pool()
         print("Pool: ", pool)
-        tile_positions = self._generate_tile_positions(pool)
+        tile_positions = self._generate_letter_positions(pool)
         print("Tile map:", tile_positions)
         for t in tile_positions:
             pos = t[0]
             letter = t[1]
             rank = [r for r in RANK_LETTERS if letter in RANK_LETTERS[r]][0]
-            self.tile_map[t] = Tile(self.canvas,
+            self.tile_map[pos] = Tile(self.canvas,
                                     width=self.twidth,
                                     height=self.theight,
                                     coords=self.grid.pxcoords_from_coords(self.grid.coords_from_pos(pos)),
@@ -118,10 +118,11 @@ class Board(object):
     def _collect_tile(self, event):
         for p in self._players:
             if p[0].is_active:
-                for l in self.tile_map:
-                    if l[0] == p[1]:
-                        print("Collecting {} tile.".format(l[1]))
-                        p[0].add_to_hand(l[1])
+                for pos in self.tile_map:
+                    if pos == p[1]:
+                        print("Collecting {} tile.".format(self.tile_map[pos].text))
+                        p[0].add_to_hand(self.tile_map[pos].text)
+                        self.tile_map[pos].reroll()
 
     def _clean_position(self, pos):
         """ Keeps the position within the range of positions
@@ -145,8 +146,8 @@ class Board(object):
         return pool
 
     @staticmethod
-    def _generate_tile_positions(pool):
-        tile_map = []
+    def _generate_letter_positions(pool):
+        letter_map = []
         ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
         pos = 0
         empty = False
@@ -163,7 +164,7 @@ class Board(object):
             if empty:
                 break
             letter = random.sample(pool_options, 1)[0]
-            tile_map.append((pos, letter))
+            letter_map.append((pos, letter))
             pool.remove(letter)
             pos += random.randint(1, 6)
-        return tile_map
+        return letter_map

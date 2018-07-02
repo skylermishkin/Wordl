@@ -53,8 +53,8 @@ class Tile(object):
         self.canvas.tag_bind(self._txt, '<ButtonRelease-1>', self.release)
         # re-roll binding
         if self._frozen:
-            self.canvas.tag_bind(self._rect, '<Double-Button-1>', self._reroll)
-            self.canvas.tag_bind(self._txt, '<Double-Button-1>', self._reroll)
+            self.canvas.tag_bind(self._rect, '<Double-Button-1>', self.reroll)
+            self.canvas.tag_bind(self._txt, '<Double-Button-1>', self.reroll)
 
     def drag(self, event):
         if self._moving:
@@ -83,7 +83,7 @@ class Tile(object):
         if self.snap_grid is not None:
             # TODO: snap grid functionality
             # find grid square with min dist to new_x,y
-            coord = self._closet_grid_coord(new_x, new_y)
+            coord = self._closest_grid_coord(new_x, new_y)
             new_x, new_y = self.snap_grid.pxcoords_from_coords(coord)
         self.canvas.move(self._rect,
                          new_x - self.xpos, new_y - self.ypos)
@@ -91,7 +91,7 @@ class Tile(object):
                          new_x - self.xpos, new_y - self.ypos)
         self.canvas.after(10)
 
-    def _closest_grip_coord(self, x, y):
+    def _closest_grid_coord(self, x, y):
         """
 
         :param x: pixels
@@ -101,7 +101,7 @@ class Tile(object):
         # TODO
         pass
 
-    def _reroll(self, event):
+    def reroll(self, *args):
         """ Replaces a tile with one that's another letter from the same rank.
         """
         print("Re-rolling")
