@@ -7,7 +7,7 @@ from settings import *
 
 
 class Board(object):
-    def __init__(self, canvas, width=20, height=10, tb_pad=20, lr_pad=50, num_players=1, *args, **kwargs):
+    def __init__(self, canvas, width=BOARD_WIDTH, height=BOARD_HEIGHT, tb_pad=TB_PAD, lr_pad=LR_PAD, num_players=1, *args, **kwargs):
         """ctor
 
         :param canvas:
@@ -54,17 +54,14 @@ class Board(object):
                                     width=self.twidth,
                                     height=self.theight,
                                     coords=self._pxcoords_from_coords(*self.grid.coords_from_pos(pos)),
-                                    color=RANK_COLORS[rank],
+                                    color=RANK_COLOR[rank],
                                     text=letter,
                                     frozen=True)
         self._players[0][0].is_active = True
 
     def update(self):
-        for t in self.tile_map:
-            self.tile_map[t].update()
         for p in self._players:
             player = p[0]
-            player.update()
             if player.is_active:
                 self._active_hand = player.hand
 

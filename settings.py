@@ -2,6 +2,15 @@
 WIDTH = 1000
 HEIGHT = 600
 
+LR_PAD = 50
+TB_PAD = 40
+
+BOARD_WIDTH = 20
+BOARD_HEIGHT = 10
+
+HAND_WIDTH = 10
+HAND_HEIGHT = 10
+
 POWER_LENGTHS = {1: range(2,12),
                  2: range(12,17),
                  3: range(17,22),
@@ -9,7 +18,7 @@ POWER_LENGTHS = {1: range(2,12),
                  5: range(27,33),
                  6: range(33,65)}
 
-RANK_COLORS = {0: "blue",
+RANK_COLOR = {0: "blue",
                1: "green",
                2: "red",
                3: "black",

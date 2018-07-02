@@ -9,23 +9,14 @@ class Player(object):
         self.diameter = diameter
         self.color = color
 
+        self.is_active = True
+
         # canvas objects
         self.circle = None
-
-        self.hand = Hand(self.canvas)
-
-        self.is_active = True
+        self.hand = Hand(self.canvas, hidden=(not self.is_active))
 
     def add_to_hand(self, letter):
         self.hand.add(letter)
-
-    def update(self, coords=None, color=None, toggle_activation=False):
-        if toggle_activation:
-            self.is_active = not self.is_active
-        if coords is not None:
-            self.coords = coords
-        if color is not None:
-            self.color = color
 
     def create(self):
         self.circle = self.canvas.create_circle(self.coords[0], self.coords[1], self.diameter * 0.5, fill=self.color)

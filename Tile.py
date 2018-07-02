@@ -4,7 +4,7 @@ from settings import *
 
 
 class Tile(object):
-    def __init__(self, canvas, coords, width=100, height=100, color="blue", text="A", frozen=False,
+    def __init__(self, canvas, coords, width=100, height=100, color="blue", text="A", frozen=False, snap_grid=None,
                  *args, **kwargs):
         """
 
@@ -22,6 +22,7 @@ class Tile(object):
         self.height = height
         self.color = color
         self.text = text
+        self.snap_grid = snap_grid
 
         # canvas objects
         self._rect = None
@@ -31,15 +32,6 @@ class Tile(object):
         self._moving = False
         self.mouse_xpos = 0
         self.mouse_ypos = 0
-
-    def update(self, coords=None, color=None, toggle_freeze=False):
-        if coords is not None:
-            self.coords = coords
-            self._move(*self.coords)
-        if color is not None:
-            self.color = color
-        if toggle_freeze:
-            self._frozen = not self._frozen
 
     def create(self):
         bbox = bbox_coords(self.coords, self.width, self.height)
@@ -85,6 +77,7 @@ class Tile(object):
                          new_x - self.mouse_xpos, new_y - self.mouse_ypos)
         self.canvas.move(self._txt,
                          new_x - self.mouse_xpos, new_y - self.mouse_ypos)
+        # TODO: snap grid functionality
         self.canvas.after(10)
 
     def _reroll(self, event):
