@@ -30,8 +30,9 @@ class Tile(object):
 
         self._frozen = frozen
         self._moving = False
-        self.mouse_xpos = 0
-        self.mouse_ypos = 0
+        self.xpos = 0
+        self.ypos = 0
+        self.grid_coord = None
 
     def create(self):
         bbox = bbox_coords(self.coords, self.width, self.height)
@@ -59,26 +60,46 @@ class Tile(object):
         if self._moving:
             new_x, new_y = event.x, event.y
             self._move(new_x, new_y)
-            self.mouse_xpos = new_x
-            self.mouse_ypos = new_y
+            self.xpos = new_x
+            self.ypos = new_y
         elif not self._frozen:
             self._moving = True
             self.canvas.tag_raise(self._rect)
             self.canvas.tag_raise(self._txt)
-            self.mouse_xpos = event.x
-            self.mouse_ypos = event.y
+            self.xpos = event.x
+            self.ypos = event.y
 
     def release(self, event):
         self._moving = False
         self.canvas.after(10)
     
     def _move(self, new_x, new_y):
+        """
+
+        :param new_x: pixels
+        :param new_y: pixels
+        :return:
+        """
+        if self.snap_grid is not None:
+            # TODO: snap grid functionality
+            # find grid square with min dist to new_x,y
+            coord = self._closet_grid_coord(new_x, new_y)
+            new_x, new_y = self.snap_grid.pxcoords_from_coords(coord)
         self.canvas.move(self._rect,
-                         new_x - self.mouse_xpos, new_y - self.mouse_ypos)
+                         new_x - self.xpos, new_y - self.ypos)
         self.canvas.move(self._txt,
-                         new_x - self.mouse_xpos, new_y - self.mouse_ypos)
-        # TODO: snap grid functionality
+                         new_x - self.xpos, new_y - self.ypos)
         self.canvas.after(10)
+
+    def _closest_grip_coord(self, x, y):
+        """
+
+        :param x: pixels
+        :param y: pixels
+        :return coord: grid coord
+        """
+        # TODO
+        pass
 
     def _reroll(self, event):
         """ Replaces a tile with one that's another letter from the same rank.
