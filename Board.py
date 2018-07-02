@@ -1,5 +1,6 @@
 import random
 
+from Grid import *
 from Tile import *
 from Player import *
 from settings import *
@@ -27,6 +28,7 @@ class Board(object):
         self.cheight = self.canvas.winfo_reqheight()
         self.twidth = (self.cwidth - lr_pad * 2) / (self.width + 1)
         self.theight = (self.cheight - tb_pad * 2) / (self.height + 2)
+        self.grid = Grid(self.width, self.height)
 
         # canvas objects
         self._pathlings = []  # list of rects used to make the board path
@@ -51,7 +53,7 @@ class Board(object):
             self.tile_map[t] = Tile(self.canvas,
                                     width=self.twidth,
                                     height=self.theight,
-                                    coords=self._coords_from_pos(pos),
+                                    coords=self._pxcoords_from_coords(*self.grid.coords_from_pos(pos)),
                                     color=RANK_COLORS[rank],
                                     text=letter,
                                     frozen=True)
@@ -80,55 +82,45 @@ class Board(object):
             self.canvas.delete(g)
         # iterate through positions on the board and print a rectangle
         for pos in range(self.width * 2 + self.height * 2):
-            self._pathlings.append(self.canvas.create_rectangle(*bbox_coords(self._coords_from_pos(pos),
-                                                                             self.twidth, self.theight),
-                                                                fill="white", outline="black"))
+            self._pathlings.append(self.canvas.create_rectangle(
+                *bbox_coords(self._pxcoords_from_coords(*self.grid.coords_from_pos(pos)),
+                             self.twidth, self.theight),
+                fill="white", outline="black"))
 
     def _add_listeners(self):
+        # simple player movement
         self.canvas.bind("<Up>", self._move_player_up)
         self.canvas.bind("<Down>", self._move_player_down)
+        # simple tile pickup
+        self.canvas.bind("<space>", self._collect_tile)
 
     def _move_player_up(self, event):
         print("Moving player up")
         for p in self._players:
-            p[1] += 1
-            p[1] = self._clean_position(p[1])
-            coords = self._coords_from_pos(p[1])
-            p[0].move(coords[0] - p[0].coords[0], coords[1] - p[0].coords[1])
+            if p[0].is_active:
+                p[1] += 1
+                p[1] = self._clean_position(p[1])
+                coords = self.grid.coords_from_pos(p[1])
+                x, y = self._pxcoords_from_coords(*coords)
+                p[0].move(x - p[0].coords[0], y - p[0].coords[1])
 
     def _move_player_down(self, event):
         print("Moving player down")
         for p in self._players:
-            p[1] -= 1
-            p[1] = self._clean_position(p[1])
-            coords = self._coords_from_pos(p[1])
-            p[0].move(coords[0] - p[0].coords[0], coords[1] - p[0].coords[1])
+            if p[0].is_active:
+                p[1] -= 1
+                p[1] = self._clean_position(p[1])
+                coords = self.grid.coords_from_pos(p[1])
+                x, y = self._pxcoords_from_coords(*coords)
+                p[0].move(x - p[0].coords[0], y - p[0].coords[1])
 
-    def _coords_from_pos(self, pos):
-        """ Converts 0-based integer position on the path to a 0-based integer 2d coordinate.
-        0,0 coordinate corresponding to the upper left most position (0).
-        If you provide a position outside the 0 to n range, weird things will happen.
-
-        :param int pos: 1-based positioning
-        :return x, y: x y integer coordinates on the board grid
-        """
-        x = 0
-        y = 0
-        prior_corner_pos = self.width
-        if pos <= self.width:
-            x = pos
-        elif pos > prior_corner_pos:
-            x = self.width
-            y = pos - prior_corner_pos
-            prior_corner_pos = self.width + self.height
-        if pos > prior_corner_pos:
-            y = self.height
-            x = self.width - (pos - prior_corner_pos)
-            prior_corner_pos = self.width * 2 + self.height
-        if pos > prior_corner_pos:
-            x = 0
-            y = self.height - (pos - prior_corner_pos)
-        return self._pxcoords_from_coords(x, y)
+    def _collect_tile(self, event):
+        for p in self._players:
+            if p[0].is_active:
+                for l in self.tile_map:
+                    if l[0] == p[1]:
+                        print("Collecting {} tile.".format(l[1]))
+                        p[0].add_to_hand(l[1])
 
     def _pxcoords_from_coords(self, x, y):
         """ Given integer 2d coordinates (in _coords_from_pos), return the pixel coordinates

@@ -17,7 +17,7 @@ class Player(object):
         self.is_active = True
 
     def add_to_hand(self, letter):
-        pass
+        self.hand.add(letter)
 
     def update(self, coords=None, color=None, toggle_activation=False):
         if toggle_activation:
@@ -34,7 +34,7 @@ class Player(object):
         pass
 
     def move(self, dx, dy):
-        """ Moves player the given additions.
+        """ Moves player the given pixel additions.
 
         :param dx: pixel change in x
         :param dy: pixel change in y
