@@ -12,6 +12,9 @@ class Hand(object):
     def update(self):
         pass
 
+    def add(self, letter):
+        pass
+
     def toggle_visibility(self):
         self.hidden = not self.hidden
         if self.hidden:

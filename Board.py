@@ -30,10 +30,12 @@ class Board(object):
 
         # canvas objects
         self._pathlings = []  # list of rects used to make the board path
-        self._players = [Player(canvas,
-                                self._pxcoords_from_coords(i, 0),
-                                diameter=self.theight) for i in range(self.num_players)]
+        self._players = [[Player(canvas,
+                                 self._pxcoords_from_coords(i, 0),  # this will break if you have more than width players
+                                 diameter=self.theight*0.5,),
+                          i] for i in range(self.num_players)]  # [[Player(), pos], ...]
         self.tile_map = {}  # {(pos, letter): Tile(), ...}
+        self._active_hand = None
 
         self._add_listeners()
 
@@ -53,19 +55,24 @@ class Board(object):
                                     color=RANK_COLORS[rank],
                                     text=letter,
                                     frozen=True)
+        self._players[0][0].is_active = True
 
     def update(self):
         for t in self.tile_map:
             self.tile_map[t].update()
         for p in self._players:
-            p.update()
+            player = p[0]
+            player.update()
+            if player.is_active:
+                self._active_hand = player.hand
 
     def create(self):
         self._create_path()
         for t in self.tile_map:
             self.tile_map[t].create()
         for p in self._players:
-            p.create()
+            player = p[0]
+            player.create()
 
     def _create_path(self):
         # delete old pathlings; not optimal, maybe not required
@@ -78,11 +85,29 @@ class Board(object):
                                                                 fill="white", outline="black"))
 
     def _add_listeners(self):
-        pass
+        self.canvas.bind("<Up>", self._move_player_up)
+        self.canvas.bind("<Down>", self._move_player_down)
+
+    def _move_player_up(self, event):
+        print("Moving player up")
+        for p in self._players:
+            p[1] += 1
+            p[1] = self._clean_position(p[1])
+            coords = self._coords_from_pos(p[1])
+            p[0].move(coords[0] - p[0].coords[0], coords[1] - p[0].coords[1])
+
+    def _move_player_down(self, event):
+        print("Moving player down")
+        for p in self._players:
+            p[1] -= 1
+            p[1] = self._clean_position(p[1])
+            coords = self._coords_from_pos(p[1])
+            p[0].move(coords[0] - p[0].coords[0], coords[1] - p[0].coords[1])
 
     def _coords_from_pos(self, pos):
         """ Converts 0-based integer position on the path to a 0-based integer 2d coordinate.
         0,0 coordinate corresponding to the upper left most position (0).
+        If you provide a position outside the 0 to n range, weird things will happen.
 
         :param int pos: 1-based positioning
         :return x, y: x y integer coordinates on the board grid
@@ -106,7 +131,7 @@ class Board(object):
         return self._pxcoords_from_coords(x, y)
 
     def _pxcoords_from_coords(self, x, y):
-        """ Given integer 2d coordinates (from _coords_from_pos), return the pixel coordinates
+        """ Given integer 2d coordinates (in _coords_from_pos), return the pixel coordinates
         (for passing to canvas stuff).
 
         :param int x:
@@ -114,6 +139,19 @@ class Board(object):
         :return px_x, px_y: the pixel coordinates
         """
         return x * self.twidth + self.lr_pad, (1 + y) * self.theight + self.tb_pad
+
+    def _clean_position(self, pos):
+        """ Keeps the position within the range of positions
+
+        :param pos:
+        :return pos:
+        """
+        max_pos = self.width * 2 + self.height * 2
+        if pos < 0:
+            pos = max_pos + pos
+        elif pos > max_pos:
+            pos = pos - max_pos
+        return pos
 
     @staticmethod
     def _generate_pool():

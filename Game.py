@@ -16,6 +16,7 @@ class Game(object):
         self.canvas = canvas
         self.num_players = num_players
 
+        self.canvas.focus_set()
         """
         # setup mouse handling
         self._mousex = None
@@ -25,7 +26,7 @@ class Game(object):
         """
 
         # canvas objects
-        self.board = Board(self.canvas)
+        self.board = Board(self.canvas, num_players=self.num_players)
 
         self.setup()
         self.create()

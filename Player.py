@@ -16,7 +16,8 @@ class Player(object):
 
         self.is_active = True
 
-        self.hand = []
+    def add_to_hand(self, letter):
+        pass
 
     def update(self, coords=None, color=None, toggle_activation=False):
         if toggle_activation:
@@ -27,14 +28,17 @@ class Player(object):
             self.color = color
 
     def create(self):
-        self.circle = self.canvas.create_circle(*self.coords, self.diameter * 0.5, fill=self.color)
+        self.circle = self.canvas.create_circle(self.coords[0], self.coords[1], self.diameter * 0.5, fill=self.color)
 
     def setup(self):
         pass
 
-    def move(self, coords):
-        """ Moves player to the given position.
+    def move(self, dx, dy):
+        """ Moves player the given additions.
 
-        :param coords: (x, y) pixel coordinates
+        :param dx: pixel change in x
+        :param dy: pixel change in y
         """
-        self.coords = coords
+        self.coords = (self.coords[0] + dx, self.coords[1] + dy)
+        self.canvas.move(self.circle, dx, dy)
+        self.canvas.after(10)

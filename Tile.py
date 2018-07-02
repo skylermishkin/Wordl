@@ -96,8 +96,8 @@ class Tile(object):
         repl_letter = random.sample(replacement_options, 1)[0]
         self.text = repl_letter
         self.canvas.delete(self._txt)
-        self._txt = self.canvas.create_text(self.coords[0] + self.width * 0.5,
-                                            self.coords[1] + self.height * 0.5,
+        self._txt = self.canvas.create_text(self.coords[0],
+                                            self.coords[1],
                                             text=self.text,
                                             font="Comic {} bold".format(int(self.height / 2)),
                                             fill="white")
