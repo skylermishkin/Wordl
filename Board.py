@@ -28,12 +28,16 @@ class Board(object):
         self.cheight = self.canvas.winfo_reqheight()
         self.twidth = (self.cwidth - lr_pad * 2) / (self.width + 1)
         self.theight = (self.cheight - tb_pad * 2) / (self.height + 2)
-        self.grid = Grid(self.width, self.height)
+        self.grid = Grid(self.width, self.height,
+                         px_x=self.lr_pad,
+                         px_y=self.theight + self.tb_pad,
+                         width=self.twidth * self.width,
+                         height=self.theight * self.height)
 
         # canvas objects
         self._pathlings = []  # list of rects used to make the board path
         self._players = [[Player(canvas,
-                                 self._pxcoords_from_coords(i, 0),  # this will break if you have more than width players
+                                 self.grid.pxcoords_from_coords((i, 0)),  # this will break if you have more than width players
                                  diameter=self.theight*0.5,),
                           i] for i in range(self.num_players)]  # [[Player(), pos], ...]
         self.tile_map = {}  # {(pos, letter): Tile(), ...}
@@ -53,7 +57,7 @@ class Board(object):
             self.tile_map[t] = Tile(self.canvas,
                                     width=self.twidth,
                                     height=self.theight,
-                                    coords=self._pxcoords_from_coords(*self.grid.coords_from_pos(pos)),
+                                    coords=self.grid.pxcoords_from_coords(self.grid.coords_from_pos(pos)),
                                     color=RANK_COLOR[rank],
                                     text=letter,
                                     frozen=True)
@@ -80,7 +84,7 @@ class Board(object):
         # iterate through positions on the board and print a rectangle
         for pos in range(self.width * 2 + self.height * 2):
             self._pathlings.append(self.canvas.create_rectangle(
-                *bbox_coords(self._pxcoords_from_coords(*self.grid.coords_from_pos(pos)),
+                *bbox_coords(self.grid.pxcoords_from_coords(self.grid.coords_from_pos(pos)),
                              self.twidth, self.theight),
                 fill="white", outline="black"))
 
@@ -98,7 +102,7 @@ class Board(object):
                 p[1] += 1
                 p[1] = self._clean_position(p[1])
                 coords = self.grid.coords_from_pos(p[1])
-                x, y = self._pxcoords_from_coords(*coords)
+                x, y = self.grid.pxcoords_from_coords(coords)
                 p[0].move(x - p[0].coords[0], y - p[0].coords[1])
 
     def _move_player_down(self, event):
@@ -108,7 +112,7 @@ class Board(object):
                 p[1] -= 1
                 p[1] = self._clean_position(p[1])
                 coords = self.grid.coords_from_pos(p[1])
-                x, y = self._pxcoords_from_coords(*coords)
+                x, y = self.grid.pxcoords_from_coords(coords)
                 p[0].move(x - p[0].coords[0], y - p[0].coords[1])
 
     def _collect_tile(self, event):
@@ -118,16 +122,6 @@ class Board(object):
                     if l[0] == p[1]:
                         print("Collecting {} tile.".format(l[1]))
                         p[0].add_to_hand(l[1])
-
-    def _pxcoords_from_coords(self, x, y):
-        """ Given integer 2d coordinates (in _coords_from_pos), return the pixel coordinates
-        (for passing to canvas stuff).
-
-        :param int x:
-        :param int y:
-        :return px_x, px_y: the pixel coordinates
-        """
-        return x * self.twidth + self.lr_pad, (1 + y) * self.theight + self.tb_pad
 
     def _clean_position(self, pos):
         """ Keeps the position within the range of positions
