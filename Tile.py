@@ -82,6 +82,7 @@ class Tile(object):
         """
         if self.snap_grid is not None:
             # TODO: snap grid functionality
+            # limit final position to the grid
             # find grid square with min dist to new_x,y
             coord = self._closest_grid_coord(new_x, new_y)
             new_x, new_y = self.snap_grid.pxcoords_from_coords(coord)

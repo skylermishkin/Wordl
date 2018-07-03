@@ -10,8 +10,8 @@ class Grid(object):
         self.twidth = self.width / self.cols
         self.theight = self.height / self.rows
 
-    def coords_from_pos(self, pos):
-        """ Converts 0-based integer position on the path to a 0-based integer 2d coordinate.
+    def coords_from_path_pos(self, pos):
+        """ Converts 0-based integer position on the perimeter path to a 0-based integer 2d coordinate.
         0,0 coordinate corresponding to the upper left most position (0).
         If you provide a position outside the 0 to n range, weird things will happen.
 
@@ -36,13 +36,12 @@ class Grid(object):
             y = self.rows - (pos - prior_corner_pos)
         return x, y
 
-    @staticmethod
-    def position_from_coords(coords):
+    def position_from_coords(self, coords):
         # TODO: fix
         return coords[0] + coords[1]
 
-    def _clean_position(self, pos):
-        """ Keeps the position within the range of positions
+    def sanitized_path_pos(self, pos):
+        """ Keeps the position within the range of positions on a perimeter path.
 
         :param pos:
         :return pos:
@@ -50,7 +49,7 @@ class Grid(object):
         max_pos = self.cols * 2 + self.rows * 2
         if pos < 0:
             pos = max_pos + pos
-        elif pos > max_pos:
+        elif pos >= max_pos:
             pos = pos - max_pos
         return pos
 

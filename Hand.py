@@ -47,7 +47,7 @@ class Hand(object):
             for i in range(self.rows * self.cols):
                 if i not in used_positions:
                     print("Assigning {} to position {}".format(letter, i))
-                    next_avail_coord = self.grid.coords_from_pos(i)
+                    next_avail_coord = self.grid.coords_from_path_pos(i)
                     break
         else:
             print("Hand is full.")
@@ -78,13 +78,3 @@ class Hand(object):
 
     def _positions_used(self):
         return [self.grid.position_from_coords(e[1]) for e in self.tiles]
-
-    def _pxcoords_from_coords(self, x, y):
-        """ Given integer 2d coordinates (in _coords_from_pos), return the pixel coordinates
-        (for passing to canvas stuff).
-
-        :param int x:
-        :param int y:
-        :return px_x, px_y: the pixel coordinates
-        """
-        return (2 + x) * self.twidth + LR_PAD, (BOARD_HEIGHT - HAND_HEIGHT -1 + y) * self.theight + TB_PAD

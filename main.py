@@ -42,13 +42,18 @@ class WordlApp(object):
         # app lifecycle
         self.persist = True
         while self.persist:
-            self.manage()
+            self.manage_stage()
             self.root.after(10)
             self.root.update_idletasks()
             self.root.update()
         self.root.destroy()
 
-    def manage(self):
+    def manage_stage(self):
+        """ Handles the stages of the game (power determination, board setting, exploration, and finalization). This
+        likely involves calling some methods of the game that are stage-specific. Ultimately updates the game to ensure
+        the changes to game are appropriately reflected to the user.
+
+        """
         if self._determining_power:
             pass
         elif self._setting_board:
@@ -64,7 +69,7 @@ class WordlApp(object):
         menu_bar = tk.Menu(self.root)
 
         # File menu pulldowns
-        file_menu = tk.Menu(menu_bar)
+        file_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="New Game", command=self._create_new_game)
         file_menu.add_command(label="Open...", command=self._open_map)
@@ -75,6 +80,7 @@ class WordlApp(object):
         help_menu = tk.Menu(menu_bar)
         menu_bar.add_cascade(label="Help", menu=help_menu)
         help_menu.add_command(label="About...", command=self._about_wordl)
+        help_menu.add_command(label="Rules...", command=self._rules)
 
         self.root.config(menu=menu_bar)
 
@@ -88,6 +94,9 @@ class WordlApp(object):
         self.game = None
         self.game = Game(self.canvas)
         self._determining_power = True
+
+    def _rules(self, *event):
+        print("Well...")
 
     def _about_wordl(self, *event):
         print("It's chill")

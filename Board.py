@@ -36,16 +36,16 @@ class Board(object):
 
         # canvas objects
         self._pathlings = []  # list of rects used to make the board path
-        self._players = [[Player(canvas,
-                                 self.grid.pxcoords_from_coords((i, 0)),  # this will break if you have more than width players
-                                 diameter=self.theight*0.5,),
-                          i] for i in range(self.num_players)]  # [[Player(), pos], ...] TODO update to self.players = {Player: pos}
+        self._players = {}
+        # TODO update to self.players = {Player: pos}
+        print(self._players)
         self.tile_map = {}  # {pos: Tile(), ...}
         self._active_hand = None
 
         self._add_listeners()
 
     def setup(self):
+        # Tile stuff
         pool = self._generate_pool()
         print("Pool: ", pool)
         tile_positions = self._generate_letter_positions(pool)
@@ -57,24 +57,24 @@ class Board(object):
             self.tile_map[pos] = Tile(self.canvas,
                                     width=self.twidth,
                                     height=self.theight,
-                                    coords=self.grid.pxcoords_from_coords(self.grid.coords_from_pos(pos)),
+                                    coords=self.grid.pxcoords_from_coords(self.grid.coords_from_path_pos(pos)),
                                     color=RANK_COLOR[rank],
                                     text=letter,
                                     frozen=True)
-        self._players[0][0].is_active = True
 
-    def update(self):
-        for p in self._players:
-            player = p[0]
-            if player.is_active:
-                self._active_hand = player.hand
+        # Player stuff
+        for i in range(self.num_players):
+            p = Player(self.canvas,
+                       coords=self.grid.pxcoords_from_coords((i, 0)),  # this will break if you have more than width players
+                       diameter=self.theight*0.5)
+            p.is_active = True if i is 0 else False
+            self._players[p] = i
 
     def create(self):
         self._create_path()
         for t in self.tile_map:
             self.tile_map[t].create()
-        for p in self._players:
-            player = p[0]
+        for player in self._players:
             player.create()
 
     def _create_path(self):
@@ -84,7 +84,7 @@ class Board(object):
         # iterate through positions on the board and print a rectangle
         for pos in range(self.width * 2 + self.height * 2):
             self._pathlings.append(self.canvas.create_rectangle(
-                *bbox_coords(self.grid.pxcoords_from_coords(self.grid.coords_from_pos(pos)),
+                *bbox_coords(self.grid.pxcoords_from_coords(self.grid.coords_from_path_pos(pos)),
                              self.twidth, self.theight),
                 fill="white", outline="black"))
 
@@ -97,61 +97,41 @@ class Board(object):
 
     def _move_player_up(self, event):
         print("Moving player up")
-        for p in self._players:
-            if p[0].is_active:
-                p[1] += 1
-                p[1] = self._clean_position(p[1])
-                coords = self.grid.coords_from_pos(p[1])
-                x, y = self.grid.pxcoords_from_coords(coords)
-                p[0].move(x - p[0].coords[0], y - p[0].coords[1])
+        for player in self._players:
+            if player.is_active:
+                print("Pos before: {}".format(self._players[player]))
+                self._players[player] += 1
+                self._players[player] = self.grid.sanitized_path_pos(self._players[player])
+                print("Pos after: {}".format(self._players[player]))
+                x, y = self.grid.pxcoords_from_coords(self.grid.coords_from_path_pos(self._players[player]))
+                player.move(x - player.coords[0], y - player.coords[1])
 
     def _move_player_down(self, event):
         print("Moving player down")
-        for p in self._players:
-            if p[0].is_active:
-                p[1] -= 1
-                p[1] = self._clean_position(p[1])
-                coords = self.grid.coords_from_pos(p[1])
-                x, y = self.grid.pxcoords_from_coords(coords)
-                p[0].move(x - p[0].coords[0], y - p[0].coords[1])
+        for player in self._players:
+            if player.is_active:
+                print("Pos before: {}".format(self._players[player]))
+                self._players[player] -= 1
+                self._players[player] = self.grid.sanitized_path_pos(self._players[player])
+                print("Pos after: {}".format(self._players[player]))
+                x, y = self.grid.pxcoords_from_coords(self.grid.coords_from_path_pos(self._players[player]))
+                player.move(x - player.coords[0], y - player.coords[1])
 
     def _collect_tile(self, event):
-        for p in self._players:
-            if p[0].is_active:
+        for player in self._players:
+            if player.is_active:
                 for pos in self.tile_map:
-                    if pos == p[1]:
+                    if pos == self._players[player]:
                         print("Collecting {} tile.".format(self.tile_map[pos].text))
-                        p[0].add_to_hand(self.tile_map[pos].text)
+                        player.add_to_hand(self.tile_map[pos].text)
                         self.tile_map[pos].reroll()
 
-    def _clean_position(self, pos):
-        """ Keeps the position within the range of positions
-
-        :param pos:
-        :return pos:
-        """
-        max_pos = self.width * 2 + self.height * 2
-        if pos < 0:
-            pos = max_pos + pos
-        elif pos > max_pos:
-            pos = pos - max_pos
-        return pos
-
-    @staticmethod
-    def _generate_pool():
-        # Requires variables from settings.py to be locally available
-        pool = set()
-        for rank in RANK_LETTERS:
-            pool.update(set(random.sample(RANK_LETTERS[rank], RANK_POP[rank])))
-        return pool
-
-    @staticmethod
-    def _generate_letter_positions(pool):
+    def _generate_letter_positions(self, pool):
         letter_map = []
         ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
         pos = 0
         empty = False
-        while pos <= 60:
+        while pos <= self.height * 2 + self.width * 2:
             rank_picked = random.sample(ranks_to_sample, 1)[0]
             pool_options = [l for l in pool if l in RANK_LETTERS[rank_picked]]
             while len(pool_options) == 0:
@@ -168,3 +148,11 @@ class Board(object):
             pool.remove(letter)
             pos += random.randint(1, 6)
         return letter_map
+
+    @staticmethod
+    def _generate_pool():
+        # Requires variables from settings.py to be locally available
+        pool = set()
+        for rank in RANK_LETTERS:
+            pool.update(set(random.sample(RANK_LETTERS[rank], RANK_POP[rank])))
+        return pool

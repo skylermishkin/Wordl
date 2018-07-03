@@ -10,6 +10,7 @@ class Player(object):
         self.color = color
 
         self.is_active = True
+        self.is_hidden = False
 
         # canvas objects
         self.circle = None

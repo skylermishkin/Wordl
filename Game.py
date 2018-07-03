@@ -16,32 +16,21 @@ class Game(object):
         self.canvas = canvas
         self.num_players = num_players
 
-        self.canvas.focus_set()
-        """
-        # setup mouse handling
-        self._mousex = None
-        self._mousey = None
-        self.canvas.bind('<Button-1>', self._on_click)
-        self.canvas.bind('<ButtonRelease-1>', self._on_release)
-        """
+        self._determining_power = True
+        self._setting_board = False
+        self._exploring = False
+        self._finalizing = False
 
+        self.canvas.focus_set()
         # canvas objects
         self.board = Board(self.canvas, num_players=self.num_players)
 
-        self.setup()
-        self.create()
-
-    def update(self):
-        self.board.update()
-
-        self.canvas.after(10)
-        self.canvas.update()
-
-    def create(self):
+        self.board.setup()
         self.board.create()
 
-    def setup(self):
-        self.board.setup()
+    def update(self):
+        self.canvas.after(10)
+        self.canvas.update()
 
     def _on_move(self, event):
         self._mousex, self._mousey = event.x, event.y
