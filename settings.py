@@ -11,6 +11,9 @@ BOARD_HEIGHT = 14
 HAND_WIDTH = 8
 HAND_HEIGHT = 10
 
+NUM_D6 = 6
+NUM_D4 = 2
+
 POWER_LENGTHS = {1: range(2,12),
                  2: range(12,17),
                  3: range(17,22),

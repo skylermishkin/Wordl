@@ -32,7 +32,6 @@ class Hand(object):
                                                     fill="white", outline="black")
 
     def add(self, letter):
-        self.update()
         if len(self.tiles) < self.rows * self.cols:
             used_positions = [self.tiles[tile] for tile in self.tiles]
             for i in range(self.rows * self.cols):

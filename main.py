@@ -33,7 +33,7 @@ class WordlApp(object):
         self._create_new_game()
         self.canvas.pack()
 
-        # stages can be {"determining_power", "setting_board", "collecting", "finalizing"}
+        # stages can be {"determining_power", "collecting", "finalizing"}
         self._stage = "determining_power"
 
         # app lifecycle
@@ -44,15 +44,14 @@ class WordlApp(object):
         self.root.destroy()
 
     def manage_stage(self):
-        """ Handles the stages of the game (power determination, board setting, exploration, and finalization). This
+        """ Handles the stages of the game (power determination, exploration, and finalization). This
         likely involves calling some methods of the game that are stage-specific. Ultimately updates the game to ensure
         the changes to game are appropriately reflected to the user.
 
         """
+        # TODO
         if self._stage == "determining_power":
             self.game.prompt_power_rolls()
-        elif self._stage == "setting_board":
-            pass
         elif self._stage == "collecting":
             pass
         elif self._stage == "finalizing":

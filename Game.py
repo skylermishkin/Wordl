@@ -18,12 +18,15 @@ class Game(object):
         self.num_players = num_players
 
         self.d4 = Dice(sides=4)
+        self.d4set = [Dice(sides=4) for _ in range(NUM_D4)]
         self.d6 = Dice(sides=6)
+        self.d6set = [Dice(sides=6) for _ in range(NUM_D6)]
         self.d8 = Dice(sides=8)
         self.d20 = Dice(sides=20)
 
-        # stage/phase flags
+        # stages can be {"determining_power", "collecting", "finalizing"}
         self.stage = "determining_power"
+        self.pending_user_input = False
 
         self.canvas.focus_set()
         # utility listeners - always on
