@@ -22,9 +22,6 @@ class Player(object):
     def create(self):
         self.circle = self.canvas.create_circle(self.coords[0], self.coords[1], self.diameter * 0.5, fill=self.color)
 
-    def setup(self):
-        pass
-
     def move(self, dx, dy):
         """ Moves player the given pixel additions.
 
