@@ -23,14 +23,12 @@ class Game(object):
         self.d20 = Dice(sides=20)
 
         # stage/phase flags
-        self._determining_power = True
-        self._setting_board = False
-        self._exploring = False
-        self._finalizing = False
+        self.stage = "determining_power"
 
         self.canvas.focus_set()
-        # utility listener, always on
+        # utility listeners - always on
         self.canvas.bind('<Button-1>', self._on_click)
+        self.canvas.bind('<Tab>', self._toggle_players_visibility)
         self._mousey = 0
         self._mousex = 0
 
@@ -99,10 +97,8 @@ class Game(object):
         print("Moving player up")
         for player in self.players:
             if player.is_active:
-                print("Pos before: {}".format(self.players[player]))
                 self.players[player] += 1
                 self.players[player] = self.grid.sanitized_path_pos(self.players[player])
-                print("Pos after: {}".format(self.players[player]))
                 x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(self.players[player]))
                 player.move(x - player.coords[0], y - player.coords[1])
 
@@ -110,10 +106,8 @@ class Game(object):
         print("Moving player down")
         for player in self.players:
             if player.is_active:
-                print("Pos before: {}".format(self.players[player]))
                 self.players[player] -= 1
                 self.players[player] = self.grid.sanitized_path_pos(self.players[player])
-                print("Pos after: {}".format(self.players[player]))
                 x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(self.players[player]))
                 player.move(x - player.coords[0], y - player.coords[1])
 
@@ -129,3 +123,12 @@ class Game(object):
     def _on_click(self, event):
         self._mousex, self._mousey = event.x, event.y
         print("Click: {}, {}".format(self._mousex, self._mousey))
+
+    def _toggle_players_visibility(self, event):
+        print("Toggled player visibility")
+        for player in self.players:
+            player.toggle_visibility()
+
+    def prompt_power_rolls(self):
+        # TODO
+        pass

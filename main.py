@@ -33,11 +33,8 @@ class WordlApp(object):
         self._create_new_game()
         self.canvas.pack()
 
-        # Flags for state of the game
-        self._determining_power = False
-        self._setting_board = False
-        self._exploring = False
-        self._finalizing = False
+        # stages can be {"determining_power", "setting_board", "collecting", "finalizing"}
+        self._stage = "determining_power"
 
         # app lifecycle
         self.persist = True
@@ -52,15 +49,16 @@ class WordlApp(object):
         the changes to game are appropriately reflected to the user.
 
         """
-        if self._determining_power:
+        if self._stage == "determining_power":
+            self.game.prompt_power_rolls()
+        elif self._stage == "setting_board":
             pass
-        elif self._setting_board:
+        elif self._stage == "collecting":
             pass
-        elif self._exploring:
-            pass
-        elif self._finalizing:
+        elif self._stage == "finalizing":
             pass
         self.game.update()
+        self._stage = self.game.stage
 
     def _create_menus(self):
         # instantiate a parent tk Menu

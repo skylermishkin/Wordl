@@ -28,7 +28,8 @@ class Tile(object):
         self._rect = None
         self._txt = None
 
-        self._frozen = frozen
+        self.frozen = frozen
+        self._hidden = False
         self._moving = False
         self.grid_pos = None if self.snap_grid is None else self.snap_grid.position_snapped_to_grid(self.coord)
 
@@ -50,14 +51,14 @@ class Tile(object):
         self.canvas.tag_bind(self._txt, '<Button1-Motion>', self._drag)
         self.canvas.tag_bind(self._txt, '<ButtonRelease-1>', self._release)
         # re-roll binding
-        if self._frozen:
+        if self.frozen:
             self.canvas.tag_bind(self._rect, '<Double-Button-1>', self.reroll)
             self.canvas.tag_bind(self._txt, '<Double-Button-1>', self.reroll)
 
     def _drag(self, event):
         if self._moving:
             self._move(event.x, event.y)
-        elif not self._frozen:
+        elif not self.frozen:
             self._moving = True
             self.canvas.tag_raise(self._rect)
             self.canvas.tag_raise(self._txt)
@@ -104,6 +105,18 @@ class Tile(object):
                                             font="Comic {} bold".format(int(self.height / 2)),
                                             fill="white")
         self._start_bindings()
+
+    def hide(self):
+        self._hidden = True
+        # is there a better way?
+        self.canvas.delete(self._rect)
+        self.canvas.delete(self._txt)
+        self._rect = None
+        self._txt = None
+
+    def reveal(self):
+        self._hidden = False
+        self.create()
 
 
 def bbox_coord(coord, width, height):

@@ -2,6 +2,7 @@ import random
 
 from Grid import *
 from Tile import *
+from Dice import *
 from settings import *
 
 
@@ -23,6 +24,8 @@ class Board(object):
         self.height = height
         self.lr_pad = lr_pad
         self.tb_pad = tb_pad
+
+        self.d6 = Dice(sides=6)
 
         # canvas objects
         self._pathlings = []  # list of rects used to make the board path
@@ -82,7 +85,7 @@ class Board(object):
             letter = random.sample(pool_options, 1)[0]
             letter_map.append((pos, letter))
             pool.remove(letter)
-            pos += random.randint(1, 6)
+            pos += self.d6.roll()
         return letter_map
 
     @staticmethod

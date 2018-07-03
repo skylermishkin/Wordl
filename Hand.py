@@ -8,7 +8,7 @@ class Hand(object):
         self.canvas = canvas
         self.rows = rows
         self.cols = cols
-        self.hidden = hidden
+        self._hidden = hidden
 
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
@@ -36,7 +36,6 @@ class Hand(object):
         if len(self.tiles) < self.rows * self.cols:
             used_positions = [self.tiles[tile] for tile in self.tiles]
             for i in range(self.rows * self.cols):
-                print i, i in used_positions
                 if i not in used_positions:
                     print("Assigning {} to position {}".format(letter, i))
                     next_avail_coord = self.grid.coord_from_pos(i)
@@ -52,7 +51,6 @@ class Hand(object):
                         width=self.twidth, height=self.theight, frozen=False)
         new_tile.create()
         self.tiles[new_tile] = i
-        self.grid.fill_position(i)
         print("Hand: {}".format(self.tiles))
 
     def update(self):
@@ -67,12 +65,18 @@ class Hand(object):
             self.reveal()
 
     def hide(self):
-        # TODO
-        self.hidden = True
+        self._hidden = True
+        for tile in self.tiles:
+            tile.hide()
 
     def reveal(self):
-        # TODO
-        self.hidden = False
+        self._hidden = False
+        for tile in self.tiles:
+            tile.reveal()
 
     def _positions_used(self):
         return [self.grid.position_from_coord(e[1]) for e in self.tiles]
+
+    def _highlight_words(self):
+        # TODO: dictionary integration
+        pass
