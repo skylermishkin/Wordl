@@ -1,5 +1,7 @@
 from Board import *
+from Player import *
 from Grid import *
+from Dice import *
 from settings import *
 
 
@@ -14,6 +16,11 @@ class Game(object):
         """
         self.canvas = canvas
         self.num_players = num_players
+
+        self.d4 = Dice(sides=4)
+        self.d6 = Dice(sides=6)
+        self.d8 = Dice(sides=8)
+        self.d20 = Dice(sides=20)
 
         # stage/phase flags
         self._determining_power = True
@@ -39,12 +46,11 @@ class Game(object):
         # canvas objects
         self.board = Board(self.canvas, self.grid,
                            width=BOARD_WIDTH, height=BOARD_HEIGHT,
-                           tb_pad=TB_PAD, lr_pad=LR_PAD,
-                           numplayers=self.num_players)
+                           tb_pad=TB_PAD, lr_pad=LR_PAD,)
         self.players = {}
         for i in range(self.num_players):
             p = Player(self.canvas,
-                       coords=self.grid.pxcoords_from_coords((i, 0)),  # this will break if you have more than width players
+                       coords=self.grid.pxcoord_from_coord((i, 0)),
                        diameter=self.theight*0.5)
             p.is_active = True if i is 0 else False
             self.players[p] = i
@@ -95,7 +101,7 @@ class Game(object):
                 self.players[player] += 1
                 self.players[player] = self.grid.sanitized_path_pos(self.players[player])
                 print("Pos after: {}".format(self.players[player]))
-                x, y = self.grid.pxcoords_from_coords(self.grid.coords_from_path_pos(self.players[player]))
+                x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(self.players[player]))
                 player.move(x - player.coords[0], y - player.coords[1])
 
     def _move_player_down(self, event):
@@ -106,7 +112,7 @@ class Game(object):
                 self.players[player] -= 1
                 self.players[player] = self.grid.sanitized_path_pos(self.players[player])
                 print("Pos after: {}".format(self.players[player]))
-                x, y = self.grid.pxcoords_from_coords(self.grid.coords_from_path_pos(self.players[player]))
+                x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(self.players[player]))
                 player.move(x - player.coords[0], y - player.coords[1])
 
     def _collect_tile(self, event):

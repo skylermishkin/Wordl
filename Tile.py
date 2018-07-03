@@ -47,16 +47,16 @@ class Tile(object):
 
     def _start_bindings(self):
         # drag binding
-        self.canvas.tag_bind(self._rect, '<Button1-Motion>', self.drag)
-        self.canvas.tag_bind(self._rect, '<ButtonRelease-1>', self.release)
-        self.canvas.tag_bind(self._txt, '<Button1-Motion>', self.drag)
-        self.canvas.tag_bind(self._txt, '<ButtonRelease-1>', self.release)
+        self.canvas.tag_bind(self._rect, '<Button1-Motion>', self._drag)
+        self.canvas.tag_bind(self._rect, '<ButtonRelease-1>', self._release)
+        self.canvas.tag_bind(self._txt, '<Button1-Motion>', self._drag)
+        self.canvas.tag_bind(self._txt, '<ButtonRelease-1>', self._release)
         # re-roll binding
         if self._frozen:
             self.canvas.tag_bind(self._rect, '<Double-Button-1>', self.reroll)
             self.canvas.tag_bind(self._txt, '<Double-Button-1>', self.reroll)
 
-    def drag(self, event):
+    def _drag(self, event):
         if self._moving:
             new_x, new_y = event.x, event.y
             self._move(new_x, new_y)
@@ -69,8 +69,19 @@ class Tile(object):
             self.xpos = event.x
             self.ypos = event.y
 
-    def release(self, event):
+    def _release(self, event):
         self._moving = False
+        if self.snap_grid is not None:
+            new_x, new_y = event.x, event.y
+            self._move(new_x, new_y)
+            self.xpos = new_x
+            self.ypos = new_y
+            pxcoord = self.snap_grid.pxcoord_snapped_to_grid((event.x, event.y))
+            self._move(pxcoord[0], pxcoord[1])
+            self.xpos = pxcoord[0]
+            self.ypos = pxcoord[1]
+            self.canvas.tag_raise(self._rect)
+            self.canvas.tag_raise(self._txt)
         self.canvas.after(10)
     
     def _move(self, new_x, new_y):
@@ -80,12 +91,7 @@ class Tile(object):
         :param new_y: pixels
         :return:
         """
-        if self.snap_grid is not None:
-            # TODO: snap grid functionality
-            # limit final position to the grid
-            # find grid square with min dist to new_x,y
-            coord = self._closest_grid_coord(new_x, new_y)
-            new_x, new_y = self.snap_grid.pxcoords_from_coords(coord)
+        # TODO limit final position to the grid
         self.canvas.move(self._rect,
                          new_x - self.xpos, new_y - self.ypos)
         self.canvas.move(self._txt,

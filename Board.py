@@ -2,12 +2,12 @@ import random
 
 from Grid import *
 from Tile import *
-from Player import *
 from settings import *
 
 
 class Board(object):
-    def __init__(self, canvas, grid, width=BOARD_WIDTH, height=BOARD_HEIGHT, tb_pad=TB_PAD, lr_pad=LR_PAD, num_players=1, *args, **kwargs):
+    def __init__(self, canvas, grid, width=BOARD_WIDTH, height=BOARD_HEIGHT, tb_pad=TB_PAD, lr_pad=LR_PAD,
+                 *args, **kwargs):
         """ctor
 
         :param canvas:
@@ -16,7 +16,6 @@ class Board(object):
         :param height:  num tiles high
         :param tb_pad:
         :param lr_pad:
-        :param num_players:
         """
         self.canvas = canvas
         self.grid = grid
@@ -24,12 +23,10 @@ class Board(object):
         self.height = height
         self.lr_pad = lr_pad
         self.tb_pad = tb_pad
-        self.num_players = num_players
 
         # canvas objects
         self._pathlings = []  # list of rects used to make the board path
         self.tile_map = {}  # {pos: Tile(), ...}
-        self._active_hand = None
 
     def setup(self):
         # Tile stuff
@@ -42,12 +39,12 @@ class Board(object):
             letter = t[1]
             rank = [r for r in RANK_LETTERS if letter in RANK_LETTERS[r]][0]
             self.tile_map[pos] = Tile(self.canvas,
-                                    width=self.grid.twidth,
-                                    height=self.grid.theight,
-                                    coords=self.grid.pxcoords_from_coords(self.grid.coords_from_path_pos(pos)),
-                                    color=RANK_COLOR[rank],
-                                    text=letter,
-                                    frozen=True)
+                                      width=self.grid.twidth,
+                                      height=self.grid.theight,
+                                      coords=self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
+                                      color=RANK_COLOR[rank],
+                                      text=letter,
+                                      frozen=True)
 
     def create(self):
         self._create_path()
@@ -61,7 +58,7 @@ class Board(object):
         # iterate through positions on the board and print a rectangle
         for pos in range(self.width * 2 + self.height * 2):
             self._pathlings.append(self.canvas.create_rectangle(
-                *bbox_coords(self.grid.pxcoords_from_coords(self.grid.coords_from_path_pos(pos)),
+                *bbox_coords(self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
                              self.grid.twidth, self.grid.theight),
                 fill="white", outline="black"))
 
