@@ -63,6 +63,8 @@ class Game(object):
         self._start_listeners()
 
     def update(self):
+        for player in self.players:
+            player.hand.update()
         self.canvas.after(10)
         self.canvas.update()
 

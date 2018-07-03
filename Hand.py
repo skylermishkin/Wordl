@@ -24,20 +24,19 @@ class Hand(object):
                          height=rows * self.theight)
 
         # canvas objects
-        self.tiles = []  # [(Tile, grid_coord), ...]
+        self.tiles = {}  # {Tile: pos, ...}
         ul_pxcoord = self.grid.pxcoord_from_coord((0, 0))
         br_pxcoord = self.grid.pxcoord_from_coord((self.cols, self.rows))
         self.outline = self.canvas.create_rectangle(ul_pxcoord[0]-0.5*self.twidth, ul_pxcoord[1]-0.5*self.theight,
-                                                    br_pxcoord[0]+0.5*self.twidth, br_pxcoord[1]+0.5*self.theight,
+                                                    br_pxcoord[0]-0.5*self.twidth, br_pxcoord[1]-0.5*self.theight,
                                                     fill="white", outline="black")
 
     def add(self, letter):
-        if len(self.tiles) == 0:
-            next_avail_coord = (0, 0)
-        elif len(self.tiles) <= self.rows * self.cols:
-            used_coords = [e[1] for e in self.tiles]
-            used_positions = [self.grid.position_from_coord(c) for c in used_coords]
+        self.update()
+        if len(self.tiles) < self.rows * self.cols:
+            used_positions = [self.tiles[tile] for tile in self.tiles]
             for i in range(self.rows * self.cols):
+                print i, i in used_positions
                 if i not in used_positions:
                     print("Assigning {} to position {}".format(letter, i))
                     next_avail_coord = self.grid.coord_from_pos(i)
@@ -46,13 +45,19 @@ class Hand(object):
             print("Hand is full.")
             return
         color = RANK_COLOR[LETTER_RANK[letter]]
-        self.tiles.append([Tile(self.canvas,
-                                self.grid.pxcoord_from_coord(next_avail_coord),
-                                snap_grid=self.grid,
-                                color=color, text=letter, width=self.twidth, height=self.theight, frozen=False),
-                          next_avail_coord])
-        self.tiles[-1][0].create()
+        new_tile = Tile(self.canvas,
+                        self.grid.pxcoord_from_coord(next_avail_coord),
+                        snap_grid=self.grid,
+                        color=color, text=letter,
+                        width=self.twidth, height=self.theight, frozen=False)
+        new_tile.create()
+        self.tiles[new_tile] = i
+        self.grid.fill_position(i)
         print("Hand: {}".format(self.tiles))
+
+    def update(self):
+        for tile in self.tiles:
+            self.tiles[tile] = tile.grid_pos
 
     def toggle_visibility(self):
         self.hidden = not self.hidden

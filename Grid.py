@@ -13,6 +13,11 @@ class Grid(object):
         self.twidth = self.width / self.cols
         self.theight = self.height / self.rows
 
+        self.position_pxcoords = []
+        self._cache_position_pxcoords()
+
+        self.filled_positions = set()
+
     def coord_from_pos(self, pos):
         """
 
@@ -85,15 +90,18 @@ class Grid(object):
         """
         return self.px_x + (coord[0] * self.twidth), self.px_y + (coord[1] * self.theight)
 
-    def pxcoord_snapped_to_grid(self, pxcoord):
+    def position_snapped_to_grid(self, pxcoord):
         # brute force!!GRRYAYAAHH!!@#!@$!#$%!#
-        position_pxcoords = []
         euclidean_distances = []
+        for i in range(self.rows * self.cols):
+            pos_pxcoord = self.position_pxcoords[i]
+            euclidean_distances.append(math.hypot(pxcoord[0] - pos_pxcoord[0], pxcoord[1] - pos_pxcoord[1]))
+        min_dist = min(euclidean_distances)
+        print("Snapped min dist {} to pos {}".format(min_dist, euclidean_distances.index(min_dist)))
+        return euclidean_distances.index(min_dist)
+
+    def _cache_position_pxcoords(self):
         for i in range(self.rows * self.cols):
             pos_coord = self.coord_from_pos(i)
             pos_pxcoord = self.pxcoord_from_coord(pos_coord)
-            position_pxcoords.append(pos_pxcoord)
-            euclidean_distances.append(math.hypot(pxcoord[0] - pos_pxcoord[0], pxcoord[1] - pos_pxcoord[1]))
-        min_dist = min(euclidean_distances)
-        print("Min dist {} to pos {}".format(min_dist, position_pxcoords[euclidean_distances.index(min_dist)]))
-        return position_pxcoords[euclidean_distances.index(min_dist)]
+            self.position_pxcoords.append(pos_pxcoord)
