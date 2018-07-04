@@ -38,19 +38,19 @@ class Game(object):
                          width=self.twidth * BOARD_WIDTH,
                          height=self.theight * BOARD_HEIGHT)
         self.dice_grid = Grid(1, 6,
-                              px_x=13 * self.twidth + LR_PAD,
+                              px_x=12 * self.twidth + LR_PAD,
                               px_y=(BOARD_HEIGHT - HAND_HEIGHT + 2) * self.theight + TB_PAD,
                               width=1 * self.twidth,
                               height=6 * self.theight)
         self.d4 = Dice(sides=4)
         self.d4set = [Dice(sides=4,
                            canvas=self.canvas,
-                           coord=self.dice_grid.coord_from_pos(_),
+                           coord=self.dice_grid.pxcoord_from_coord(self.dice_grid.coord_from_pos(_)),
                            grid=self.dice_grid) for _ in range(NUM_D4)]
         self.d6 = Dice(sides=6)
         self.d6set = [Dice(sides=6,
                            canvas=self.canvas,
-                           coord=self.dice_grid.coord_from_pos(_),
+                           coord=self.dice_grid.pxcoord_from_coord(self.dice_grid.coord_from_pos(_)),
                            grid=self.dice_grid) for _ in range(NUM_D6)]
         self.d8 = Dice(sides=8)
         self.d20 = Dice(sides=20)
@@ -144,4 +144,11 @@ class Game(object):
 
     def prompt_power_rolls(self):
         # TODO
-        pass
+        # make d4set visible,
+        for die in self.d4set:
+            die.create()
+        # suspend all actions other than dice click
+        # cache the num_words for the player on click
+        # remove d4 set and prompt with d8 set equal to num_words
+        # cache the word lengths for the player on click
+        # display the player's word config

@@ -11,16 +11,22 @@ class Player(object):
 
         self.is_active = True
         self._hidden = False
+        self.num_words = 0
+        self.word_lengths = []
 
         # canvas objects
-        self.circle = None
+        self._circle = None
+        self._config_box = None
         self.hand = Hand(self.canvas, hidden=(not self.is_active))
 
     def add_to_hand(self, letter):
         self.hand.add(letter)
 
     def create(self):
-        self.circle = self.canvas.create_circle(self.coords[0], self.coords[1], self.diameter * 0.5, fill=self.color)
+        # body
+        self._circle = self.canvas.create_circle(self.coords[0], self.coords[1], self.diameter * 0.5, fill=self.color)
+        # config box
+        # TODO
 
     def toggle_visibility(self):
         if self._hidden:
@@ -31,8 +37,10 @@ class Player(object):
     def hide(self):
         if not self._hidden:
             self._hidden = True
-            self.canvas.delete(self.circle)
-            self.circle = None
+            self.canvas.delete(self._circle)
+            self.canvas.delete(self._config_box)
+            self._circle = None
+            self._config_box = None
             self.hand.hide()
 
     def reveal(self):
@@ -48,5 +56,5 @@ class Player(object):
         :param dy: pixel change in y
         """
         self.coords = (self.coords[0] + dx, self.coords[1] + dy)
-        self.canvas.move(self.circle, dx, dy)
+        self.canvas.move(self._circle, dx, dy)
         self.canvas.after(10)

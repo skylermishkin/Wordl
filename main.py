@@ -39,11 +39,11 @@ class WordlApp(object):
         # app lifecycle
         self.persist = True
         while self.persist:
-            self.manage_stage()
+            self.mediate_control()
             self.root.update_idletasks()
         self.root.destroy()
 
-    def manage_stage(self):
+    def mediate_control(self):
         """ Handles the stages of the game (power determination, exploration, and finalization). This
         likely involves calling some methods of the game that are stage-specific. Ultimately updates the game to ensure
         the changes to game are appropriately reflected to the user.
@@ -72,7 +72,7 @@ class WordlApp(object):
         file_menu.add_command(label="Exit", command=self._exit)
 
         # help menu pulldowns
-        help_menu = tk.Menu(menu_bar)
+        help_menu = tk.Menu(menu_bar, tearoff=0)
         menu_bar.add_cascade(label="Help", menu=help_menu)
         help_menu.add_command(label="About...", command=self._about_wordl)
         help_menu.add_command(label="Rules...", command=self._rules)
@@ -100,6 +100,8 @@ class WordlApp(object):
         print("You are not ready yet")
 
     def _on_resize(self, event):
+        # TODO: this is pretty broken really,
+        # screen size changes don't propogate - make them variables passed deeply
         wscale = float(event.width) / self.cwidth
         hscale = float(event.height) / self.cheight
         self.cwidth = event.width
@@ -107,7 +109,6 @@ class WordlApp(object):
         # resize the canvas
         self.canvas.config(width=self.cwidth, height=self.cheight)
         # rescale all the objects tagged with the "all" tag
-        # TODO: this needs to also scal text size
         self.canvas.scale("all", 0, 0, wscale, hscale)
 
 

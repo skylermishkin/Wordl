@@ -17,7 +17,7 @@ class Tile(object):
         :param frozen:
         """
         self.canvas = canvas
-        self.coord = list(coord)
+        self.coord = list(coord)  # pixels
         self.width = width
         self.height = height
         self.color = color
@@ -88,12 +88,12 @@ class Tile(object):
         self.canvas.move(self._txt, new_x - self.coord[0], new_y - self.coord[1])
         self.coord[0] = new_x
         self.coord[1] = new_y
-        self.canvas.after(10)
+        #self.canvas.update_idletasks()
 
     def reroll(self, *args):
         """ Replaces a tile with one that's another letter from the same rank.
         """
-        print("Re-rolling")
+        print("Rolling tile")
         rank = LETTER_RANK[self.text]
         replacement_options = {repl for repl in RANK_LETTERS[rank] if repl != self.text}
         repl_letter = random.sample(replacement_options, 1)[0]
@@ -117,8 +117,6 @@ class Tile(object):
             self._hidden = True
             self.canvas.delete(self._rect)
             self.canvas.delete(self._txt)
-            self._rect = None
-            self._txt = None
 
     def reveal(self):
         if self._hidden:
