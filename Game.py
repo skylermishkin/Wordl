@@ -17,13 +17,6 @@ class Game(object):
         self.canvas = canvas
         self.num_players = num_players
 
-        self.d4 = Dice(sides=4)
-        self.d4set = [Dice(sides=4) for _ in range(NUM_D4)]
-        self.d6 = Dice(sides=6)
-        self.d6set = [Dice(sides=6) for _ in range(NUM_D6)]
-        self.d8 = Dice(sides=8)
-        self.d20 = Dice(sides=20)
-
         # stages can be {"determining_power", "collecting", "finalizing"}
         self.stage = "determining_power"
         self.pending_user_input = False
@@ -44,6 +37,23 @@ class Game(object):
                          px_y=self.theight + TB_PAD,
                          width=self.twidth * BOARD_WIDTH,
                          height=self.theight * BOARD_HEIGHT)
+        self.dice_grid = Grid(1, 6,
+                              px_x=13 * self.twidth + LR_PAD,
+                              px_y=(BOARD_HEIGHT - HAND_HEIGHT + 2) * self.theight + TB_PAD,
+                              width=1 * self.twidth,
+                              height=6 * self.theight)
+        self.d4 = Dice(sides=4)
+        self.d4set = [Dice(sides=4,
+                           canvas=self.canvas,
+                           coord=self.dice_grid.coord_from_pos(_),
+                           grid=self.dice_grid) for _ in range(NUM_D4)]
+        self.d6 = Dice(sides=6)
+        self.d6set = [Dice(sides=6,
+                           canvas=self.canvas,
+                           coord=self.dice_grid.coord_from_pos(_),
+                           grid=self.dice_grid) for _ in range(NUM_D6)]
+        self.d8 = Dice(sides=8)
+        self.d20 = Dice(sides=20)
         # canvas objects
         self.board = Board(self.canvas, self.grid,
                            width=BOARD_WIDTH, height=BOARD_HEIGHT,

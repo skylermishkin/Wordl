@@ -106,17 +106,24 @@ class Tile(object):
                                             fill="white")
         self._start_bindings()
 
+    def toggle_visibility(self):
+        if self._hidden:
+            self.reveal()
+        else:
+            self.hide()
+
     def hide(self):
-        self._hidden = True
-        # is there a better way?
-        self.canvas.delete(self._rect)
-        self.canvas.delete(self._txt)
-        self._rect = None
-        self._txt = None
+        if not self._hidden:
+            self._hidden = True
+            self.canvas.delete(self._rect)
+            self.canvas.delete(self._txt)
+            self._rect = None
+            self._txt = None
 
     def reveal(self):
-        self._hidden = False
-        self.create()
+        if self._hidden:
+            self._hidden = False
+            self.create()
 
 
 def bbox_coord(coord, width, height):

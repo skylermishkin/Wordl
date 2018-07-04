@@ -23,23 +23,23 @@ class Player(object):
         self.circle = self.canvas.create_circle(self.coords[0], self.coords[1], self.diameter * 0.5, fill=self.color)
 
     def toggle_visibility(self):
-        self._hidden = not self._hidden
         if self._hidden:
-            self.hide()
-        else:
             self.reveal()
+        else:
+            self.hide()
 
     def hide(self):
-        self._hidden = True
-        # is there a better way?
-        self.canvas.delete(self.circle)
-        self.circle = None
-        self.hand.hide()
+        if not self._hidden:
+            self._hidden = True
+            self.canvas.delete(self.circle)
+            self.circle = None
+            self.hand.hide()
 
     def reveal(self):
-        self._hidden = False
-        self.create()
-        self.hand.reveal()
+        if self._hidden:
+            self._hidden = False
+            self.create()
+            self.hand.reveal()
 
     def move(self, dx, dy):
         """ Moves player the given pixel additions.

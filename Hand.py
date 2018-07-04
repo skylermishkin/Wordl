@@ -57,21 +57,22 @@ class Hand(object):
             self.tiles[tile] = tile.grid_pos
 
     def toggle_visibility(self):
-        self.hidden = not self.hidden
-        if self.hidden:
-            self.hide()
-        else:
+        if self._hidden:
             self.reveal()
+        else:
+            self.hide()
 
     def hide(self):
-        self._hidden = True
-        for tile in self.tiles:
-            tile.hide()
+        if not self._hidden:
+            self._hidden = True
+            for tile in self.tiles:
+                tile.hide()
 
     def reveal(self):
-        self._hidden = False
-        for tile in self.tiles:
-            tile.reveal()
+        if self._hidden:
+            self._hidden = False
+            for tile in self.tiles:
+                tile.reveal()
 
     def _positions_used(self):
         return [self.grid.position_from_coord(e[1]) for e in self.tiles]

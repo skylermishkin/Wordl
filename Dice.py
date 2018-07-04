@@ -9,6 +9,7 @@ class Dice(object):
         self._grid = grid
 
         self._value = 0  # yuck
+        self._hidden = False
 
         # canvas objects if enabled
         self._rect = None
@@ -40,6 +41,22 @@ class Dice(object):
                                              font="Comic {} bold".format(int(self._grid.theight / 2)),
                                              fill="black")
         self._start_bindings()
+
+    def toggle_visibility(self):
+        if self._hidden:
+            self.reveal()
+        else:
+            self.hide()
+
+    def hide(self):
+        if not self._hidden:
+            self._hidden = True
+            self._canvas.delete(self._rect)
+            self._canvas.delete(self._txt)
+
+    def reveal(self):
+        if not self._hidden:
+            self.create()
 
     def _start_bindings(self):
         self._canvas.tag_bind(self._rect, '<Double-Button-1>', self.roll)
