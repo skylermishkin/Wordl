@@ -37,7 +37,7 @@ class Game(object):
                          px_y=self.theight + TB_PAD,
                          width=self.twidth * BOARD_WIDTH,
                          height=self.theight * BOARD_HEIGHT)
-        self.dice_grid = Grid(1, 6,
+        self.dice_grid = Grid(1, 8,
                               px_x=12 * self.twidth + LR_PAD,
                               px_y=(BOARD_HEIGHT - HAND_HEIGHT + 2) * self.theight + TB_PAD,
                               width=1 * self.twidth,
@@ -151,24 +151,31 @@ class Game(object):
     def update(self):
         # TODO control phases/stages, visibilities (like dice) and listeners
         if self.stage is None:
-            if not self.pending_user_input:
-                for die in self.d4set:
-                    die.reveal()
-                self.pending_user_input = True
+            for die in self.d4set:
+                die.reveal()
+            self.pending_user_input = True
             self.stage = "determining_power"
+            print("############DETERMINE POWERS###########")
+
         if self.stage is "determining_power":
-            self.determine_powers()
+            self.power_determination()
+
         elif self.stage is "collecting":
-            self._start_listeners({"movement", "pickup"})
+            if not self.pending_user_input:
+                for die in self.d6set:
+                    die.reveal()
+                    die.frozen = False
+                self.pending_user_input = True
+                self._start_listeners({"movement", "pickup"})
+            self.collection()
+
         for player in self.players:
             player.hand.update()
         self.canvas.update()
 
-    def determine_powers(self):
+    def power_determination(self):
         all_determined = True
-        for player, pos in sorted(self.players.iteritems()):
-            if not player.is_active:
-                continue
+        for player, pos in sorted(self.players.iteritems()):  # this should keep it in order right? :eek:
             # TODO visual prompt for specific player
             if player.num_words is None:
                 all_determined = False
@@ -202,8 +209,13 @@ class Game(object):
                     for die in self.d8set:
                         player.word_lengths.append(die.value)
                         die.hide()
+                    player.power = player.determine_power(player.word_lengths)
                     self.d8set = None
         if all_determined:
+            print("############COLLECTION PHASE###########")
             self.stage = "collecting"
+            self.pending_user_input = False
 
-
+    def collection(self):
+        # TODO
+        pass

@@ -63,3 +63,11 @@ class Player(CanvasObject):
         self.canvas.move(self._circle, new_x - self._pxcoord[0], new_y - self._pxcoord[1])
         self._pxcoord[0] = new_x
         self._pxcoord[1] = new_y
+
+    @staticmethod
+    def determine_power(word_lengths):
+        s = sum(word_lengths)
+        for p in POWER_LENGTHS:
+            if s in POWER_LENGTHS[p]:
+                return p
+        raise RuntimeError("Word length sum {} was outside 65".format(s))
