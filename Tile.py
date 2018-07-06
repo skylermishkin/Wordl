@@ -64,8 +64,6 @@ class Tile(CanvasObject):
     def _drag(self, event):
         if self._moving:
             self.move(event.x, event.y)
-            self._pxcoord[0] = event.x
-            self._pxcoord[1] = event.y
         elif not self.frozen:
             self._moving = True
             self.canvas.tag_raise(self._rect)
@@ -76,13 +74,13 @@ class Tile(CanvasObject):
     def _release(self, event):
         self._moving = False
         if self.grid is not None:
-            # TODO: still a bit off; I think from where on the tile you grab compared to it's center
             self.grid_pos = self.grid.position_snapped_to_grid([event.x, event.y])
             pxcoord = self.grid.position_pxcoords[self.grid_pos]
             self.move(pxcoord[0], pxcoord[1])
             self.canvas.tag_raise(self._rect)
             self.canvas.tag_raise(self._txt)
-        self.canvas.after(10)
+            self._pxcoord[0] = pxcoord[0]
+            self._pxcoord[1] = pxcoord[1]
     
     def move(self, new_x, new_y):
         """

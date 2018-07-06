@@ -58,6 +58,6 @@ class CanvasObject:
         :param new_y: pixels
         :return:
         """
-        print("movement not drawn")  # canvas.move
+        print("movement not drawn")  # canvas.move or canvas.coords
         self._pxcoord[0] = new_x
         self._pxcoord[1] = new_y

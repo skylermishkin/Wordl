@@ -18,7 +18,7 @@ class Game(object):
         self.num_players = num_players
 
         # stages can be {"determining_power", "collecting", "finalizing"}
-        self.stage = "determining_power"
+        self.stage = None
         self.pending_user_input = False
 
         self.canvas.focus_set()
@@ -46,19 +46,22 @@ class Game(object):
         self.d4set = [Dice(sides=4,
                            canvas=self.canvas,
                            pxcoord=self.dice_grid.pxcoord_from_coord(self.dice_grid.coord_from_pos(_)),
-                           grid=self.dice_grid) for _ in range(NUM_D4)]
+                           grid=self.dice_grid,
+                           freeze=True) for _ in range(NUM_D4)]
         self.d6 = Dice(sides=6)
         self.d6set = [Dice(sides=6,
                            canvas=self.canvas,
                            pxcoord=self.dice_grid.pxcoord_from_coord(self.dice_grid.coord_from_pos(_)),
-                           grid=self.dice_grid) for _ in range(NUM_D6)]
+                           grid=self.dice_grid,
+                           freeze=True) for _ in range(NUM_D6)]
         self.d8 = Dice(sides=8)
+        self.d8set = None
         self.d20 = Dice(sides=20)
         # canvas objects
         self.board = Board(self.canvas, self.grid,
                            width=BOARD_WIDTH, height=BOARD_HEIGHT,
-                           tb_pad=TB_PAD, lr_pad=LR_PAD,)
-        self.players = {}
+                           tb_pad=TB_PAD, lr_pad=LR_PAD)
+        self.players = {}  # {Player: pos, ...}
         for i in range(self.num_players):
             p = Player(self.canvas,
                        pxcoord=self.grid.pxcoord_from_coord((i, 0)),
@@ -72,16 +75,12 @@ class Game(object):
         for player in self.players:
             player.reveal()
 
-        self._start_listeners()
-
-    def update(self):
-        # TODO control visibilities (like dice) and listeners
-        for player in self.players:
-            player.hand.update()
-        self.canvas.after(10)
-        self.canvas.update()
-
     def _start_listeners(self, groups={"movement", "pickup"}):
+        """
+
+        :param groups: {"movement", "pickup"}
+        :return:
+        """
         if "movement" in groups:
             # simple player movement
             self.canvas.bind("<Up>", self._move_player_up)
@@ -93,6 +92,11 @@ class Game(object):
             pass # TODO
 
     def _kill_listeners(self,  groups={"movement", "pickup"}):
+        """
+
+        :param groups: {"movement", "pickup"}
+        :return:
+        """
         if "movement" in groups:
             # simple player movement
             self.canvas.bind("<Up>", self._ignore)
@@ -144,13 +148,62 @@ class Game(object):
         for player in self.players:
             player.toggle_visibility()
 
-    def prompt_power_rolls(self):
-        # TODO
-        # make d4set visible,
-        for die in self.d4set:
-            die.reveal()
-        # suspend all actions other than dice click
-        # cache the num_words for the player on click
-        # remove d4 set and prompt with d8 set equal to num_words
-        # cache the word lengths for the player on click
-        # display the player's word config
+    def update(self):
+        # TODO control phases/stages, visibilities (like dice) and listeners
+        if self.stage is None:
+            if not self.pending_user_input:
+                for die in self.d4set:
+                    die.reveal()
+                self.pending_user_input = True
+            self.stage = "determining_power"
+        if self.stage is "determining_power":
+            self.determine_powers()
+        elif self.stage is "collecting":
+            self._start_listeners({"movement", "pickup"})
+        for player in self.players:
+            player.hand.update()
+        self.canvas.update()
+
+    def determine_powers(self):
+        all_determined = True
+        for player, pos in sorted(self.players.iteritems()):
+            if not player.is_active:
+                continue
+            # TODO visual prompt for specific player
+            if player.num_words is None:
+                all_determined = False
+                all_rolled = True
+                for die in self.d4set:
+                    if not die.frozen:
+                        all_rolled = False
+                        break
+                if all_rolled:
+                    player.num_words = sum([die.value for die in self.d4set])
+                    for die in self.d4set:
+                        die.frozen = False
+            elif player.word_lengths is None:
+                all_determined = False
+                all_rolled = True
+                # !!!! hide and reveal in this scope will iterate every game frame :(
+                for die in self.d4set:
+                    die.hide()
+                if self.d8set is None:
+                    self.d8set = [Dice(sides=8,
+                               canvas=self.canvas,
+                               pxcoord=self.dice_grid.pxcoord_from_coord(self.dice_grid.coord_from_pos(_)),
+                               grid=self.dice_grid,
+                               freeze=True) for _ in range(player.num_words)]
+                for die in self.d8set:
+                    die.reveal()
+                    if not die.frozen:
+                        all_rolled = False
+                if all_rolled:
+                    player.word_lengths = []
+                    for die in self.d8set:
+                        player.word_lengths.append(die.value)
+                        die.hide()
+                    self.d8set = None
+        if all_determined:
+            self.stage = "collecting"
+
+

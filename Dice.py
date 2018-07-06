@@ -4,11 +4,13 @@ from CanvasObject import *
 
 
 class Dice(CanvasObject):
-    def __init__(self,  sides=6, canvas=None, pxcoord=None, grid=None):
+    def __init__(self,  sides=6, canvas=None, pxcoord=None, grid=None, freeze=False):
         CanvasObject.__init__(self, canvas, pxcoord, grid)
         self._sides = sides
+        self._freeze = freeze
 
         self.value = "#"  # will hold dice roll
+        self.frozen = False  # start un-frozen
 
         # canvas objects
         self._rect = None
@@ -33,20 +35,29 @@ class Dice(CanvasObject):
         self.canvas.tag_bind(self._txt, '<Double-Button-1>', self._click_roll)
 
     def roll(self, num_rolls=1):
-        print("Rolling die")
-        if num_rolls == 1:
-            self.value = random.randint(1, self._sides)
-            if self.canvas is not None:
-                self._remove()
-                self._create()
-            return self.value
-        else:
-            values = [random.randint(1, self._sides) for _ in range(num_rolls)]
-            self.value = values[-1]  # just show the last one
-            if self.canvas is not None:
-                self._remove()
-                self._create()
-            return values
+        """
+
+        :param num_rolls:
+        :param freeze:
+        :return:
+        """
+        if not self.frozen:
+            if num_rolls == 1:
+                result = random.randint(1, self._sides)
+                self.value = result
+                if self.canvas is not None:
+                    self._remove()
+                    self._create()
+            else:
+                result = [random.randint(1, self._sides) for _ in range(num_rolls)]
+                self.value = result[-1]  # just show the last one
+                if self.canvas is not None:
+                    self._remove()
+                    self._create()
+            if self._freeze:
+                self.frozen = True
+            print("Rolled {}".format(result))
+            return result
 
     def _click_roll(self, event):
         self.roll()

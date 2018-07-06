@@ -9,9 +9,11 @@ class Player(CanvasObject):
         self.diameter = diameter
         self.color = color
 
+        self.num_words = None  # int (2,8)
+        self.word_lengths = None  # list of ints
+        self.power = None  # int (1,6)
+
         self.is_active = True
-        self.num_words = 0
-        self.word_lengths = []
 
         # canvas objects
         self._circle = None

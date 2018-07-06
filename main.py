@@ -39,7 +39,7 @@ class WordlApp(object):
         # app lifecycle
         self.persist = True
         while self.persist:
-            self.mediate_control()
+            self.game.update()
             self.root.update_idletasks()
         self.root.destroy()
 
@@ -51,7 +51,7 @@ class WordlApp(object):
         """
         # TODO
         if self._stage == "determining_power":
-            self.game.prompt_power_rolls()
+            self.game.determine_powers()
         elif self._stage == "collecting":
             pass
         elif self._stage == "finalizing":
@@ -97,7 +97,7 @@ class WordlApp(object):
         print("It's chill")
 
     def _open_map(self, *event):
-        print("You are not ready yet")
+        print("No maps yet")
 
     def _on_resize(self, event):
         # TODO: this is pretty broken really,
