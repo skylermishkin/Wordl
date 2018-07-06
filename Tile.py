@@ -10,9 +10,9 @@ class Tile(CanvasObject):
         """
 
         :param canvas:
-        :param tuple coords:
-        :param width:
-        :param height:
+        :param pxcoord:
+        :param width: in pixels
+        :param height: in pixels
         :param color:
         :param text:
         :param frozen:
@@ -22,6 +22,8 @@ class Tile(CanvasObject):
         self.height = height
         self.color = color
         self.text = text
+
+        self.fontsize = int(self.height * self.width / 60)
 
         # canvas objects
         self._rect = None
@@ -39,7 +41,7 @@ class Tile(CanvasObject):
             self._txt = self.canvas.create_text(self._pxcoord[0],
                                                 self._pxcoord[1],
                                                 text=self.text,
-                                                font="Comic {} bold".format(int(self.height / 2)),
+                                                font="Comic {} bold".format(self.fontsize),
                                                 fill="white")
         self._start_bindings()
 
@@ -89,8 +91,10 @@ class Tile(CanvasObject):
         :param new_y: pixels
         :return:
         """
-        self.canvas.move(self._rect, new_x - self._pxcoord[0], new_y - self._pxcoord[1])
-        self.canvas.move(self._txt, new_x - self._pxcoord[0], new_y - self._pxcoord[1])
+        self.canvas.coords(self._rect, *bbox_coord((new_x, new_y), self.width, self.height))
+        self.canvas.coords(self._txt, new_x, new_y)
+        self.canvas.tag_raise(self._rect)
+        self.canvas.tag_raise(self._txt)
         self._pxcoord[0] = new_x
         self._pxcoord[1] = new_y
 
@@ -106,7 +110,7 @@ class Tile(CanvasObject):
         self._txt = self.canvas.create_text(self._pxcoord[0],
                                             self._pxcoord[1],
                                             text=self.text,
-                                            font="Comic {} bold".format(int(self.height / 2)),
+                                            font="Comic {} bold".format(self.fontsize),
                                             fill="white")
         self._start_bindings()
 

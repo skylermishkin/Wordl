@@ -3,6 +3,15 @@ import math
 
 class Grid(object):
     def __init__(self, cols, rows, px_x=0, px_y=0, width=0, height=0):
+        """ctor
+
+        :param int cols:
+        :param int rows:
+        :param int px_x: upper left pixel x
+        :param int px_y: upper left pixel y
+        :param int width: pixel width
+        :param int height: pixel height
+        """
         self.cols = cols
         self.rows = rows
         self.px_x = px_x
@@ -10,13 +19,14 @@ class Grid(object):
         self.width = width
         self.height = height
 
+        # tile properties
         self.twidth = self.width / self.cols
         self.theight = self.height / self.rows
 
         self.position_pxcoords = []
         self._cache_position_pxcoords()
 
-        self.filled_positions = set()
+        #self.filled_positions = set()
 
     def coord_from_pos(self, pos):
         """
@@ -91,7 +101,7 @@ class Grid(object):
         return self.px_x + (coord[0] * self.twidth), self.px_y + (coord[1] * self.theight)
 
     def position_snapped_to_grid(self, pxcoord):
-        # brute force!!GRRYAYAAHH!!@#!@$!#$%!#
+        # TODO non-overlap option
         euclidean_distances = []
         for i in range(self.rows * self.cols):
             pos_pxcoord = self.position_pxcoords[i]

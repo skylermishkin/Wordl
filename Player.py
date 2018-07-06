@@ -4,7 +4,7 @@ from Hand import *
 
 
 class Player(CanvasObject):
-    def __init__(self, canvas, pxcoord, diameter=100, color="yellow", grid=None, *args, **kwargs):
+    def __init__(self, canvas, pxcoord, grid=None, diameter=100, color="yellow", *args, **kwargs):
         CanvasObject.__init__(self, canvas, pxcoord, grid)
         self.diameter = diameter
         self.color = color

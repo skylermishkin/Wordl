@@ -4,16 +4,19 @@ from abc import ABCMeta, abstractmethod
 class CanvasObject:
     __metaclass__ = ABCMeta
 
-    def __init__(self, canvas=None, pxcoord=None, grid=None):
+    def __init__(self, canvas=None, pxcoord=None, grid=None, grid_pos=None):
         """ctor
 
         :param canvas:
         :param pxcoord: [x, y] integer pixels
         :param grid: Grid() object
         """
-        self._pxcoord = None if pxcoord is None else list(pxcoord)
         self.canvas = canvas
         self.grid = grid
+        self.grid_pos = None
+        self._pxcoord = None if not pxcoord else list(pxcoord)
+        if self._pxcoord is None and self.grid_pos is not None:
+            self._pxcoord = self.grid.position_pxcoords[self.grid_pos]
 
         self._hidden = True  # don't draw until reveal
 
