@@ -45,10 +45,10 @@ class Hand(object):
         color = RANK_COLOR[LETTER_RANK[letter]]
         new_tile = Tile(self.canvas,
                         self.grid.pxcoord_from_coord(next_avail_coord),
-                        snap_grid=self.grid,
+                        grid=self.grid,
                         color=color, text=letter,
                         width=self.twidth, height=self.theight, frozen=False)
-        new_tile.create()
+        new_tile.reveal()
         self.tiles[new_tile] = i
         print("Hand: {}".format(self.tiles))
 

@@ -1,19 +1,32 @@
-class CanvasObject(object):
-    def __init__(self, canvas, pxcoord, grid=None):
-        self._pxcoord = pxcoord
+from abc import ABCMeta, abstractmethod
+
+
+class CanvasObject:
+    __metaclass__ = ABCMeta
+
+    def __init__(self, canvas=None, pxcoord=None, grid=None):
+        """ctor
+
+        :param canvas:
+        :param pxcoord: [x, y] integer pixels
+        :param grid: Grid() object
+        """
+        self._pxcoord = None if pxcoord is None else list(pxcoord)
         self.canvas = canvas
         self.grid = grid
 
         self._hidden = True  # don't draw until reveal
 
+    @abstractmethod
     def _create(self):
         self._hidden = False
-        # canvas.create
+        print("nothing created")  # canvas.create
         self._start_bindings()
 
+    @abstractmethod
     def _remove(self):
         self._hidden = True
-        raise NotImplementedError  # canvas.delete
+        print("nothing deleted")  # canvas.delete
 
     def toggle_visibility(self):
         if self._hidden:
@@ -27,10 +40,11 @@ class CanvasObject(object):
             self._remove()
 
     def reveal(self):
-        if not self._hidden:
+        if self._hidden:
             self._hidden = False
             self._create()
 
+    @abstractmethod
     def _start_bindings(self):
         pass  # canvas.tag_bind
 
@@ -41,6 +55,6 @@ class CanvasObject(object):
         :param new_y: pixels
         :return:
         """
-        # canvas.move
+        print("movement not drawn")  # canvas.move
         self._pxcoord[0] = new_x
         self._pxcoord[1] = new_y

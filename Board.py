@@ -52,7 +52,7 @@ class Board(object):
     def create(self):
         self._create_path()
         for t in self.tile_map:
-            self.tile_map[t].create()
+            self.tile_map[t].reveal()
 
     def _create_path(self):
         # delete old pathlings; not optimal, maybe not required
