@@ -19,7 +19,8 @@ class Game(object):
 
         # stages can be {"determining_power", "collecting", "finalizing"}
         self.stage = None
-        self.pending_user_input = False
+        self.pending_rolls = False
+        self.pending_moves = False
 
         self.canvas.focus_set()
         # utility listeners - always on
@@ -153,19 +154,19 @@ class Game(object):
         if self.stage is None:
             for die in self.d4set:
                 die.reveal()
-            self.pending_user_input = True
+            self.pending_rolls = True
             self.stage = "determining_power"
-            print("############DETERMINE POWERS###########")
+            print("############DETERMINE POWERS############")
 
         if self.stage is "determining_power":
             self.power_determination()
 
         elif self.stage is "collecting":
-            if not self.pending_user_input:
+            if not self.pending_moves:
                 for die in self.d6set:
                     die.reveal()
                     die.frozen = False
-                self.pending_user_input = True
+                self.pending_rolls = True
                 self._start_listeners({"movement", "pickup"})
             self.collection()
 
@@ -210,12 +211,27 @@ class Game(object):
                         player.word_lengths.append(die.value)
                         die.hide()
                     player.power = player.determine_power(player.word_lengths)
+                    print("Player has {} power".format(player.power))
                     self.d8set = None
         if all_determined:
-            print("############COLLECTION PHASE###########")
+            print("############COLLECTION PHASE############")
             self.stage = "collecting"
-            self.pending_user_input = False
+            self.pending_rolls = False
 
     def collection(self):
         # TODO
-        pass
+        # wait for rolls
+        # for move in range power
+        #   wait for die highlight, and highlight the positions
+        #   wait for position selection, and move player and collect
+        if self.pending_rolls:
+            all_rolled = True
+            for die in self.d6set:
+                if not die.frozen:
+                    all_rolled = False
+            if all_rolled:
+                self.pending_rolls = False
+                self.pending_moves = True
+        if self.pending_moves:
+            moves_taken = 0
+            
