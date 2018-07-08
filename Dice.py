@@ -4,8 +4,8 @@ from CanvasObject import *
 
 
 class Dice(CanvasObject):
-    def __init__(self,  sides=6, canvas=None, pxcoord=None, grid=None, freeze=False):
-        CanvasObject.__init__(self, canvas, pxcoord, grid)
+    def __init__(self,  sides=6, canvas=None, pxcoord=None, grid=None, grid_pos=None, freeze=False):
+        CanvasObject.__init__(self, canvas, pxcoord, grid, grid_pos)
         self._sides = sides
         self._freeze = freeze
 
@@ -65,10 +65,13 @@ class Dice(CanvasObject):
 
     def highlight(self):
         if not self.highlighted:
+            print("highlighting")
             self.highlighted = True
             bbox = bbox_coord(self._pxcoord, self.grid.twidth * 1.1, self.grid.theight * 1.1)
             self.canvas.delete(self._rect)
-            self._rect = self.canvas.create_rectangle(*bbox, fill="white", outline="yellow")
+            self._rect = self.canvas.create_rectangle(*bbox, fill="white", outline="yellow", width=5)
+            self.canvas.tag_raise(self._rect)
+            self.canvas.tag_raise(self._txt)
 
     def unhighlight(self):
         if self.highlighted:
@@ -81,4 +84,4 @@ def bbox_coord(coord, width, height):
     return (coord[0] - width * 0.5,
             coord[1] - height * 0.5,
             coord[0] + width * 0.5,
-            coord[1] + height * 0.5,)
+            coord[1] + height * 0.5)

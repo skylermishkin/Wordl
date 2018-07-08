@@ -13,9 +13,11 @@ class CanvasObject:
         """
         self.canvas = canvas
         self.grid = grid
-        self.grid_pos = None
+        self.grid_pos = grid_pos
         self._pxcoord = None if not pxcoord else list(pxcoord)
         if self._pxcoord is None and self.grid_pos is not None:
+            self._pxcoord = self.grid.position_pxcoords[self.grid_pos]
+        if self.grid_pos is not None and self._pxcoord is None:
             self._pxcoord = self.grid.position_pxcoords[self.grid_pos]
 
         self._hidden = True  # don't draw until reveal

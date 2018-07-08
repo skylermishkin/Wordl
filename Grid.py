@@ -116,6 +116,14 @@ class Grid(object):
         print("Snapped min dist {} to pos {}".format(min_dist, euclidean_distances.index(min_dist)))
         return euclidean_distances.index(min_dist)
 
+    def position_from_pxcoord(self, pxcoord):
+        """Checks each position to see if it cotains the pxcoord, and returns it. Returns None otherwise.
+
+        :param pxcoord:
+        :return:
+        """
+        pass  # todo
+
     def _cache_position_pxcoords(self):
         for i in range(self.rows * self.cols):
             pos_coord = self.coord_from_pos(i)

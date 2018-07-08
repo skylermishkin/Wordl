@@ -6,7 +6,7 @@ from settings import *
 
 
 class Game(object):
-    def __init__(self, canvas, num_players=2, *args, **kwargs):
+    def __init__(self, canvas, num_players=1, *args, **kwargs):
         """ctor
 
         :param canvas:
@@ -51,7 +51,7 @@ class Game(object):
         self.d6 = Dice(sides=6)
         self.d6set = [Dice(sides=6,
                            canvas=self.canvas,
-                           pxcoord=self.dice_grid.position_pxcoords[_],
+                           grid_pos=_,
                            grid=self.dice_grid,
                            freeze=True) for _ in range(NUM_D6)]
         self.d8 = Dice(sides=8)
@@ -148,10 +148,18 @@ class Game(object):
 
     def _on_click(self, event):
         self._mousex, self._mousey = event.x, event.y
-        #print("Click: {}, {}".format(self._mousex, self._mousey))
+        # print("Click: {}, {}".format(self._mousex, self._mousey))
         if self.highlighting:
             # TODO: look for both dice and tiles to highlight
-            grid_pos = self.grid.position_snapped_to_grid((self._mousex, self._mousey))
+            grid_pos = self.dice_grid.position_snapped_to_grid((self._mousex, self._mousey))
+            if grid_pos is not None:
+                for die in self.d6set:
+                    if die.grid_pos == grid_pos:
+                        die.highlight()
+                        # find tiles to highlight
+                    else:  # make sure to unhighlight others
+                        if die.highlighted:
+                            die.unhighlight()
 
     def _toggle_players_visibility(self, event):
         print("Toggled player visibility")
