@@ -52,6 +52,7 @@ class Board(object):
     def create(self):
         self._refresh_path()
         for t in self.tile_map:
+            self.tile_map[t].hide()
             self.tile_map[t].reveal()
 
     def _refresh_path(self):
@@ -64,7 +65,7 @@ class Board(object):
             if pos in self.highlighted_positions:
                 self._pathlings.append(self.canvas.create_rectangle(
                     *bbox_coord(self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
-                                self.grid.twidth*1.1, self.grid.theight*1.1),
+                                self.grid.twidth, self.grid.theight),
                     fill="white", outline="yellow", width=5))
             else:
                 self._pathlings.append(self.canvas.create_rectangle(
@@ -78,8 +79,11 @@ class Board(object):
         self.create()
 
     def unhighlight(self, positions=None):
-        for p in positions:
-            self.highlighted_positions.remove(p)
+        if positions is None:
+            self.highlighted_positions = []
+        else:
+            for p in positions:
+                self.highlighted_positions.remove(p)
         self.create()
 
     def _generate_letter_positions(self, pool):
@@ -107,7 +111,6 @@ class Board(object):
 
     @staticmethod
     def _generate_pool():
-        # Requires variables from settings.py to be locally available
         pool = set()
         for rank in RANK_LETTERS:
             pool.update(set(random.sample(RANK_LETTERS[rank], RANK_POP[rank])))

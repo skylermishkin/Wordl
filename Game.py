@@ -115,7 +115,7 @@ class Game(object):
         # for "killing" listeners
         pass
 
-    def _move_player_up(self, event):
+    def _move_player_up(self, event=None):
         print("Moving player up")
         for p in self.players:
             player = p[0]
@@ -125,7 +125,7 @@ class Game(object):
                 x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(p[1]))
                 player.move(x, y)
 
-    def _move_player_down(self, event):
+    def _move_player_down(self, event=None):
         print("Moving player down")
         for p in self.players:
             player = p[0]
@@ -135,7 +135,7 @@ class Game(object):
                 x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(p[1]))
                 player.move(x, y)
 
-    def _collect_tile(self, event):
+    def _collect_tile(self, event=None):
         for p in self.players:
             player = p[0]
             if player.is_active:
@@ -145,31 +145,57 @@ class Game(object):
                         player.add_to_hand(self.board.tile_map[pos].text)
                         self.board.tile_map[pos].reroll()
 
+    def _use_move(self, path_pos):
+        for p in self.players:
+            player = p[0]
+            if player.is_active:
+                p[1] = self.grid.sanitized_path_pos(path_pos)
+                x, y = self.grid.pxcoord_from_path_pos(p[1])
+                player.move(x, y)
+                self._collect_tile()
+                for die in self.d6set:
+                    if die.highlighted:
+                        die.unhighlight()
+                        self.board.unhighlight()
+                        die.hide()
+                        player.hide()
+                        player.reveal()
+
     def _on_click(self, event):
         self._mousex, self._mousey = event.x, event.y
         # print("Click: {}, {}".format(self._mousex, self._mousey))
         if self.highlighting:
-            # TODO: look for both dice and tiles to highlight
-            grid_pos = self.dice_grid.position_snapped_to_grid((self._mousex, self._mousey))
-            if grid_pos is not None:
+            dice_pos = self.dice_grid.position_from_pxcoord((self._mousex, self._mousey))
+            board_pos = self.grid.path_pos_from_pxcoord((self._mousex, self._mousey))
+            if dice_pos is not None:
                 for die in self.d6set:
-                    if die.grid_pos == grid_pos:
+                    reached_positions = self.__reached_path_positions(die.value)
+                    if die.grid_pos == dice_pos:
                         die.highlight()
-                        self.board.highlight(self._reached_path_pos(die.value))
-                    else:  # make sure to unhighlight
+                        self.board.highlight(reached_positions)
+                    else:  # make sure to un-highlight
                         if die.highlighted:
                             die.unhighlight()
-                            self.board.unhighlight(self._reached_path_pos(die.value))
+                            self.board.unhighlight(reached_positions)
+                for p in self.players:
+                    p[0].hide()
+                    p[0].reveal()
+            elif board_pos is not None:
+                reached_positions = []
+                for die in self.d6set:
+                    if die.highlighted:
+                        reached_positions = self.__reached_path_positions(die.value)
+                if board_pos in reached_positions:
+                    self._use_move(board_pos)
 
-    def _reached_path_pos(self, dist):
+    def __reached_path_positions(self, dist):
         """The positions on the board path reached from the active player by the dist.
 
         :param dist:
-        :return:
+        :return int, int: forward and reverse positions on the path
         """
         for p in self.players:
             if p[0].is_active:
-                print(p[0].grid_pos, dist)
                 return (self.grid.sanitized_path_pos(p[0].grid_pos + dist),
                         self.grid.sanitized_path_pos(p[0].grid_pos - dist))
 
@@ -259,8 +285,6 @@ class Game(object):
             if player.is_active:
                 if self._all_dice_rolled(self.d6set):
                     self.highlighting = True
-                    # check highlighted tiles
-                    # highlight board positions
                     pass  # TODO do move cascade
 
     def finalization(self):

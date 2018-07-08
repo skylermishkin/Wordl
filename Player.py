@@ -22,7 +22,7 @@ class Player(CanvasObject):
         self.hand_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
                               px_x=2 * self.grid.twidth + LR_PAD,
                               px_y=3 * self.grid.theight + TB_PAD,
-                              width=int(BOARD_WIDTH / 2) * self.grid.twidth,
+                              width=int(BOARD_WIDTH / 3) * self.grid.twidth,
                               height=int(BOARD_HEIGHT / 2) * self.grid.theight)
         self.hand = Hand(self.canvas, grid=self.hand_grid, hidden=(not self.is_active))
 
@@ -76,6 +76,7 @@ class Player(CanvasObject):
         self.canvas.move(self._circle, new_x - self._pxcoord[0], new_y - self._pxcoord[1])
         self._pxcoord[0] = new_x
         self._pxcoord[1] = new_y
+        self.grid_pos = self.grid.path_pos_from_pxcoord(self._pxcoord)
 
     def determine_power(self):
         s = sum(self.word_lengths)

@@ -116,9 +116,9 @@ class Tile(CanvasObject):
     def highlight(self):
         if not self.highlighted:
             self.highlighted = True
-            bbox = bbox_coord(self._pxcoord, self.grid.twidth * 1.1, self.grid.theight * 1.1)
+            bbox = bbox_coord(self._pxcoord, self.grid.twidth, self.grid.theight)
             self.canvas.delete(self._rect)
-            self._rect = self.canvas.create_rectangle(*bbox, fill=self.color, outline="yellow")
+            self._rect = self.canvas.create_rectangle(*bbox, fill=self.color, outline="yellow", width=5)
 
     def unhighlight(self):
         if self.highlighted:

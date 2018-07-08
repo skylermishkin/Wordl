@@ -16,7 +16,7 @@ class CanvasObject:
         self.grid_pos = grid_pos
         self._pxcoord = None if not pxcoord else list(pxcoord)
         if self._pxcoord is None and self.grid_pos is not None:
-            self._pxcoord = self.grid.position_pxcoords[self.grid_pos]
+            self._pxcoord = list(self.grid.position_pxcoords[self.grid_pos])
         if self.grid_pos is None and self.grid is not None:
             self.grid_pos = self.grid.position_from_pxcoord(self._pxcoord)
 

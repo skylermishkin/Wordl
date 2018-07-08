@@ -117,12 +117,36 @@ class Grid(object):
         return euclidean_distances.index(min_dist)
 
     def position_from_pxcoord(self, pxcoord):
-        """Checks each position to see if it cotains the pxcoord, and returns it. Returns None otherwise.
+        """Checks each position to see if it contains the pxcoord, and returns it. Returns None otherwise.
 
         :param pxcoord:
         :return:
         """
-        pass  # todo
+        nearest_pos = self.position_snapped_to_grid(pxcoord)
+        nearest_pxcoord = self.position_pxcoords[nearest_pos]
+        minx = nearest_pxcoord[0] - 0.5 * self.twidth
+        maxx = nearest_pxcoord[0] + 0.5 * self.twidth
+        miny = nearest_pxcoord[1] - 0.5 * self.theight
+        maxy = nearest_pxcoord[1] + 0.5 * self.theight
+        if minx <= pxcoord[0] <= maxx:
+            if miny <= pxcoord[1] <= maxy:
+                return nearest_pos
+        return None
+
+    def path_pos_from_pxcoord(self, pxcoord):
+        nearest_pos = self.position_snapped_to_grid(pxcoord)
+        nearest_pxcoord = self.position_pxcoords[nearest_pos]
+        minx = nearest_pxcoord[0] - 0.5 * self.twidth
+        maxx = nearest_pxcoord[0] + 0.5 * self.twidth
+        miny = nearest_pxcoord[1] - 0.5 * self.theight
+        maxy = nearest_pxcoord[1] + 0.5 * self.theight
+        if minx <= pxcoord[0] <= maxx:
+            if miny <= pxcoord[1] <= maxy:
+                for path_pos in range(self.rows * 2 + self.cols * 2):
+                    if self.coord_from_path_pos(path_pos) == self.coord_from_pos(nearest_pos):
+                        return path_pos
+                return None
+        return None
 
     def _cache_position_pxcoords(self):
         for i in range(self.rows * self.cols):

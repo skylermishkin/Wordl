@@ -32,8 +32,8 @@ class Dice(CanvasObject):
         self.canvas.delete(self._txt)
 
     def _start_bindings(self):
-        self.canvas.tag_bind(self._rect, '<Double-Button-1>', self._click_roll)
-        self.canvas.tag_bind(self._txt, '<Double-Button-1>', self._click_roll)
+        self.canvas.tag_bind(self._rect, '<Button-1>', self._click_roll)
+        self.canvas.tag_bind(self._txt, '<Button-1>', self._click_roll)
 
     def roll(self, num_rolls=1):
         """
@@ -64,16 +64,16 @@ class Dice(CanvasObject):
         self.roll()
 
     def highlight(self):
-        if not self.highlighted:
+        if not self.highlighted and not self._hidden:
             self.highlighted = True
-            bbox = bbox_coord(self._pxcoord, self.grid.twidth * 1.1, self.grid.theight * 1.1)
+            bbox = bbox_coord(self._pxcoord, self.grid.twidth, self.grid.theight)
             self.canvas.delete(self._rect)
             self._rect = self.canvas.create_rectangle(*bbox, fill="white", outline="yellow", width=5)
             self.canvas.tag_raise(self._rect)
             self.canvas.tag_raise(self._txt)
 
     def unhighlight(self):
-        if self.highlighted:
+        if self.highlighted and not self._hidden:
             self.highlighted = False
             self.hide()
             self.reveal()
