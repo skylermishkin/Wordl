@@ -19,8 +19,6 @@ class Game(object):
 
         # stages can be {"determining_power", "collecting", "finalizing"}
         self.stage = None
-        self.pending_rolls = False
-        self.pending_moves = False
 
         self.canvas.focus_set()
         # utility listeners - always on
@@ -62,18 +60,20 @@ class Game(object):
         self.board = Board(self.canvas, self.grid,
                            width=BOARD_WIDTH, height=BOARD_HEIGHT,
                            tb_pad=TB_PAD, lr_pad=LR_PAD)
-        self.players = {}  # {Player: pos, ...}
+        self.players = []  # [[player, pos], ...]
         for i in range(self.num_players):
             p = Player(self.canvas,
                        pxcoord=self.grid.pxcoord_from_coord((i, 0)),
                        grid=self.grid,
-                       diameter=self.theight*0.5)
+                       diameter=self.theight*0.5,
+                       name="Player{}".format(i+1))
             p.is_active = True if i is 0 else False
-            self.players[p] = i
+            self.players.append([p, i])
 
         self.board.setup()
         self.board.create()
-        for player in self.players:
+        for p in self.players:
+            player = p[0]
             player.reveal()
 
     def _start_listeners(self, groups={"movement", "pickup"}):
@@ -115,27 +115,30 @@ class Game(object):
 
     def _move_player_up(self, event):
         print("Moving player up")
-        for player in self.players:
+        for p in self.players:
+            player = p[0]
             if player.is_active:
-                self.players[player] += 1
-                self.players[player] = self.grid.sanitized_path_pos(self.players[player])
-                x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(self.players[player]))
+                p[1] += 1
+                p[1] = self.grid.sanitized_path_pos(p[1])
+                x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(p[1]))
                 player.move(x, y)
 
     def _move_player_down(self, event):
         print("Moving player down")
-        for player in self.players:
+        for p in self.players:
+            player = p[0]
             if player.is_active:
-                self.players[player] -= 1
-                self.players[player] = self.grid.sanitized_path_pos(self.players[player])
-                x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(self.players[player]))
+                p[1] -= 1
+                p[1] = self.grid.sanitized_path_pos(p[1])
+                x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(p[1]))
                 player.move(x, y)
 
     def _collect_tile(self, event):
-        for player in self.players:
+        for p in self.players:
+            player = p[0]
             if player.is_active:
                 for pos in self.board.tile_map:
-                    if pos == self.players[player]:
+                    if pos == p[1]:
                         print("Collecting {} tile.".format(self.board.tile_map[pos].text))
                         player.add_to_hand(self.board.tile_map[pos].text)
                         self.board.tile_map[pos].reroll()
@@ -146,92 +149,79 @@ class Game(object):
 
     def _toggle_players_visibility(self, event):
         print("Toggled player visibility")
-        for player in self.players:
+        for p in self.players:
+            player = p[0]
             player.toggle_visibility()
 
     def update(self):
-        # TODO control phases/stages, visibilities (like dice) and listeners
-        if self.stage is None:
+        # control phases/stages, visibilities (like dice) and listeners
+        if self.stage is None:  # initialize
             for die in self.d4set:
                 die.reveal()
-            self.pending_rolls = True
             self.stage = "determining_power"
             print("############DETERMINE POWERS############")
+            print("{} begin your rolls".format(self.players[0][0].name))  # TODO better GUI visual
 
         if self.stage is "determining_power":
             self.power_determination()
 
-        elif self.stage is "collecting":
-            if not self.pending_moves:
-                for die in self.d6set:
-                    die.reveal()
-                    die.frozen = False
-                self.pending_rolls = True
-                self._start_listeners({"movement", "pickup"})
+        if self.stage is "collecting":
             self.collection()
 
-        for player in self.players:
-            player.hand.update()
+        if self.stage is "finalizing":
+            pass
+
+        for p in self.players:
+            player = p[0]
+            player.update()
         self.canvas.update()
 
     def power_determination(self):
-        all_determined = True
-        for player, pos in sorted(self.players.iteritems()):  # this should keep it in order right? :eek:
-            # TODO visual prompt for specific player
-            if player.num_words is None:
-                all_determined = False
-                all_rolled = True
-                for die in self.d4set:
-                    if not die.frozen:
-                        all_rolled = False
-                        break
-                if all_rolled:
-                    player.num_words = sum([die.value for die in self.d4set])
-                    for die in self.d4set:
-                        die.frozen = False
-            elif player.word_lengths is None:
-                all_determined = False
-                all_rolled = True
-                # !!!! hide and reveal in this scope will iterate every game frame :(
-                for die in self.d4set:
-                    die.hide()
-                if self.d8set is None:
-                    self.d8set = [Dice(sides=8,
-                               canvas=self.canvas,
-                               pxcoord=self.dice_grid.pxcoord_from_coord(self.dice_grid.coord_from_pos(_)),
-                               grid=self.dice_grid,
-                               freeze=True) for _ in range(player.num_words)]
-                for die in self.d8set:
-                    die.reveal()
-                    if not die.frozen:
-                        all_rolled = False
-                if all_rolled:
-                    player.word_lengths = []
-                    for die in self.d8set:
-                        player.word_lengths.append(die.value)
-                        die.hide()
-                    player.power = player.determine_power(player.word_lengths)
-                    print("Player has {} power".format(player.power))
-                    self.d8set = None
-        if all_determined:
-            print("############COLLECTION PHASE############")
-            self.stage = "collecting"
-            self.pending_rolls = False
+        for i, p in enumerate(self.players):
+            player = p[0]
+            if player.is_active:
+                if player.num_words is None:
+                    if self._all_rolled(self.d4set):
+                        player.num_words = sum([die.value for die in self.d4set])
+                        for die in self.d4set:
+                            die.hide()
+                        self.d8set = [Dice(sides=8,
+                                           canvas=self.canvas,
+                                           pxcoord=self.dice_grid.position_pxcoords[_],
+                                           grid=self.dice_grid,
+                                           freeze=True) for _ in range(player.num_words)]
+                        for die in self.d8set:
+                            die.reveal()
+                else:  # Determine word lengths
+                    if self._all_rolled(self.d8set):
+                        player.word_lengths = [die.value for die in self.d8set]
+                        player.determine_power()
+                        print("{} has {} power".format(player.name, player.power))
+                        for die in self.d8set:
+                            die.hide()
+                        self.d8set = None
+                        player.is_active = False
+                        if i + 1 < len(self.players):
+                            self.players[i+1][0].is_active = True
+                            # TODO: make better GUI visual
+                            print("{} begin your rolls".format(self.players[i+1][0].name))
+                            for die in self.d4set:
+                                die.reveal()
+                                die.frozen = False
+                        else:  # start back at player 1
+                            self.players[0][0].is_active = True
+                            # TODO better GUI visuals
+                            print("############COLLECTION PHASE############")
+                            print("{} begin your turn".format(self.players[0][0].name))
+                            self.stage = "collecting"
 
     def collection(self):
         # TODO
-        # wait for rolls
-        # for move in range power
-        #   wait for die highlight, and highlight the positions
-        #   wait for position selection, and move player and collect
-        if self.pending_rolls:
-            all_rolled = True
-            for die in self.d6set:
-                if not die.frozen:
-                    all_rolled = False
-            if all_rolled:
-                self.pending_rolls = False
-                self.pending_moves = True
-        if self.pending_moves:
-            moves_taken = 0
-            
+        pass
+
+    @staticmethod
+    def _all_rolled(dice):
+        for die in dice:
+            if not die.frozen:
+                return False
+        return True

@@ -62,7 +62,7 @@ class Board(object):
         for pos in range(self.width * 2 + self.height * 2):
             self._pathlings.append(self.canvas.create_rectangle(
                 *bbox_coord(self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
-                             self.grid.twidth, self.grid.theight),
+                            self.grid.twidth, self.grid.theight),
                 fill="white", outline="black"))
 
     def _generate_letter_positions(self, pool):

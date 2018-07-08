@@ -4,10 +4,11 @@ from Hand import *
 
 
 class Player(CanvasObject):
-    def __init__(self, canvas, pxcoord, grid=None, diameter=100, color="yellow", *args, **kwargs):
+    def __init__(self, canvas, pxcoord, grid=None, diameter=100, color="yellow", name="Player{}", *args, **kwargs):
         CanvasObject.__init__(self, canvas, pxcoord, grid)
         self.diameter = diameter
         self.color = color
+        self.name = name
 
         self.num_words = None  # int (2,8)
         self.word_lengths = None  # list of ints
@@ -19,6 +20,13 @@ class Player(CanvasObject):
         self._circle = None
         self._config_box = None
         self.hand = Hand(self.canvas, hidden=(not self.is_active))
+
+    def update(self):
+        if not self.is_active:
+            self.hand.hide()
+        else:
+            self.hand.reveal()
+        self.hand.update()
 
     def _create(self):
         # body
@@ -64,10 +72,10 @@ class Player(CanvasObject):
         self._pxcoord[0] = new_x
         self._pxcoord[1] = new_y
 
-    @staticmethod
-    def determine_power(word_lengths):
-        s = sum(word_lengths)
+    def determine_power(self):
+        s = sum(self.word_lengths)
         for p in POWER_LENGTHS:
             if s in POWER_LENGTHS[p]:
-                return p
+                self.power = p
+                return
         raise RuntimeError("Word length sum {} was outside 65".format(s))
