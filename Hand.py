@@ -4,7 +4,7 @@ from Tile import *
 
 
 class Hand(object):
-    def __init__(self, canvas, rows=10, cols=10, hidden=False, *args, **kwargs):
+    def __init__(self, canvas, grid, rows=10, cols=10, hidden=False, *args, **kwargs):
         self.canvas = canvas
         self.rows = rows
         self.cols = cols
@@ -17,11 +17,7 @@ class Hand(object):
         self.width = self.twidth * self.cols
         self.height = self.theight * self.rows
 
-        self.grid = Grid(rows, cols,
-                         px_x=2 * self.twidth + LR_PAD,
-                         px_y=(BOARD_HEIGHT - HAND_HEIGHT + 2) * self.theight + TB_PAD,
-                         width=cols * self.twidth,
-                         height=rows * self.theight)
+        self.grid = grid
 
         # canvas objects
         self.tiles = {}  # {Tile: pos, ...}

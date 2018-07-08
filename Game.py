@@ -6,7 +6,7 @@ from settings import *
 
 
 class Game(object):
-    def __init__(self, canvas, num_players=1, *args, **kwargs):
+    def __init__(self, canvas, num_players=2, *args, **kwargs):
         """ctor
 
         :param canvas:
@@ -26,6 +26,7 @@ class Game(object):
         self.canvas.bind('<Tab>', self._toggle_players_visibility)
         self._mousey = 0
         self._mousex = 0
+        self.highlighting = False
 
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
@@ -37,20 +38,20 @@ class Game(object):
                          width=self.twidth * BOARD_WIDTH,
                          height=self.theight * BOARD_HEIGHT)
         self.dice_grid = Grid(1, 8,
-                              px_x=12 * self.twidth + LR_PAD,
-                              px_y=(BOARD_HEIGHT - HAND_HEIGHT + 2) * self.theight + TB_PAD,
+                              px_x=(BOARD_WIDTH - 2) * self.twidth + LR_PAD,
+                              px_y=3 * self.theight + TB_PAD,
                               width=1 * self.twidth,
                               height=6 * self.theight)
         self.d4 = Dice(sides=4)
         self.d4set = [Dice(sides=4,
                            canvas=self.canvas,
-                           pxcoord=self.dice_grid.pxcoord_from_coord(self.dice_grid.coord_from_pos(_)),
+                           pxcoord=self.dice_grid.position_pxcoords[_],
                            grid=self.dice_grid,
                            freeze=True) for _ in range(NUM_D4)]
         self.d6 = Dice(sides=6)
         self.d6set = [Dice(sides=6,
                            canvas=self.canvas,
-                           pxcoord=self.dice_grid.pxcoord_from_coord(self.dice_grid.coord_from_pos(_)),
+                           pxcoord=self.dice_grid.position_pxcoords[_],
                            grid=self.dice_grid,
                            freeze=True) for _ in range(NUM_D6)]
         self.d8 = Dice(sides=8)
@@ -61,11 +62,13 @@ class Game(object):
                            width=BOARD_WIDTH, height=BOARD_HEIGHT,
                            tb_pad=TB_PAD, lr_pad=LR_PAD)
         self.players = []  # [[player, pos], ...]
+        player_colors = ["yellow", "brown", "white", "grey"]
         for i in range(self.num_players):
             p = Player(self.canvas,
                        pxcoord=self.grid.pxcoord_from_coord((i, 0)),
                        grid=self.grid,
                        diameter=self.theight*0.5,
+                       color=player_colors[i],
                        name="Player{}".format(i+1))
             p.is_active = True if i is 0 else False
             self.players.append([p, i])
@@ -145,7 +148,10 @@ class Game(object):
 
     def _on_click(self, event):
         self._mousex, self._mousey = event.x, event.y
-        print("Click: {}, {}".format(self._mousex, self._mousey))
+        #print("Click: {}, {}".format(self._mousex, self._mousey))
+        if self.highlighting:
+            # TODO: look for both dice and tiles to highlight
+            grid_pos = self.grid.position_snapped_to_grid((self._mousex, self._mousey))
 
     def _toggle_players_visibility(self, event):
         print("Toggled player visibility")
@@ -177,14 +183,19 @@ class Game(object):
         self.canvas.update()
 
     def power_determination(self):
+        """
+        Regulates the game state while in the Power Determination phase.
+        Will prompt each player to make their power rolls and trigger the collection phase once complete.
+        """
         for i, p in enumerate(self.players):
             player = p[0]
             if player.is_active:
                 if player.num_words is None:
-                    if self._all_rolled(self.d4set):
+                    if self._all_dice_rolled(self.d4set):
                         player.num_words = sum([die.value for die in self.d4set])
                         for die in self.d4set:
                             die.hide()
+                            die.value = "#"
                         self.d8set = [Dice(sides=8,
                                            canvas=self.canvas,
                                            pxcoord=self.dice_grid.position_pxcoords[_],
@@ -193,7 +204,7 @@ class Game(object):
                         for die in self.d8set:
                             die.reveal()
                 else:  # Determine word lengths
-                    if self._all_rolled(self.d8set):
+                    if self._all_dice_rolled(self.d8set):
                         player.word_lengths = [die.value for die in self.d8set]
                         player.determine_power()
                         print("{} has {} power".format(player.name, player.power))
@@ -212,16 +223,44 @@ class Game(object):
                             self.players[0][0].is_active = True
                             # TODO better GUI visuals
                             print("############COLLECTION PHASE############")
-                            print("{} begin your turn".format(self.players[0][0].name))
                             self.stage = "collecting"
+                            print("{} begin your turn".format(self.players[0][0].name))
+                            for die in self.d6set:
+                                die.reveal()
 
     def collection(self):
+        """
+        Regulates game state while in the collection phase.
+        Will control player turns and their order. Prompts the active player for their rolls,
+        then their moves, and finally for them to end their turn.
+        """
+        for i, p in enumerate(self.players):
+            player = p[0]
+            if player.is_active:
+                if self._all_dice_rolled(self.d6set):
+                    self.highlighting = True
+                    # check highlighted tiles
+                    # highlight board positions
+                    pass  # TODO do move cascade
+
+    def finalization(self):
+        """
+        Regullates game state while in the finalization phase.
+        Will initiate a timer for each player to do any last re-arrangements of their hand, then
+        scores up points.
+        """
         # TODO
         pass
 
     @staticmethod
-    def _all_rolled(dice):
+    def _all_dice_rolled(dice):
         for die in dice:
             if not die.frozen:
                 return False
         return True
+
+    @staticmethod
+    def _num_dice_hidden(dice):
+        result = 0
+        for die in dice:
+            result += 1 if die._hidden else 0

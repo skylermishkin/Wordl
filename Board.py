@@ -41,10 +41,9 @@ class Board(object):
             pos = t[0]
             letter = t[1]
             rank = [r for r in RANK_LETTERS if letter in RANK_LETTERS[r]][0]
-            self.tile_map[pos] = Tile(self.canvas, self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
+            self.tile_map[pos] = Tile(self.canvas, self.grid.pxcoord_from_path_pos(pos),
                                       width=self.grid.twidth,
                                       height=self.grid.theight,
-                                      coords=self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
                                       color=RANK_COLOR[rank],
                                       text=letter,
                                       frozen=True)

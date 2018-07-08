@@ -26,8 +26,6 @@ class Grid(object):
         self.position_pxcoords = []
         self._cache_position_pxcoords()
 
-        #self.filled_positions = set()
-
     def coord_from_pos(self, pos):
         """
 
@@ -74,6 +72,14 @@ class Grid(object):
             x = 0
             y = self.rows - (pos - prior_corner_pos)
         return x, y
+
+    def position_from_path_pos(self, pos):
+        coord = self.coord_from_path_pos(pos)
+        return self.position_from_coord(coord)
+
+    def pxcoord_from_path_pos(self, pos):
+        coord = self.coord_from_path_pos(pos)
+        return self.pxcoord_from_coord(coord)
 
     def position_from_coord(self, coord):
         return coord[0] + coord[1] * self.cols

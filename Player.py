@@ -14,12 +14,17 @@ class Player(CanvasObject):
         self.word_lengths = None  # list of ints
         self.power = None  # int (1,6)
 
-        self.is_active = True
+        self.is_active = False
 
         # canvas objects
         self._circle = None
         self._config_box = None
-        self.hand = Hand(self.canvas, hidden=(not self.is_active))
+        self.hand_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
+                              px_x=2 * self.grid.twidth + LR_PAD,
+                              px_y=3 * self.grid.theight + TB_PAD,
+                              width=int(BOARD_WIDTH / 2) * self.grid.twidth,
+                              height=int(BOARD_HEIGHT / 2) * self.grid.theight)
+        self.hand = Hand(self.canvas, grid=self.hand_grid, hidden=(not self.is_active))
 
     def update(self):
         if not self.is_active:

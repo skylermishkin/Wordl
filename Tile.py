@@ -18,8 +18,8 @@ class Tile(CanvasObject):
         :param frozen:
         """
         CanvasObject.__init__(self, canvas, pxcoord, grid)
-        self.width = width
-        self.height = height
+        self.width = width  # pixels
+        self.height = height  # pixels
         self.color = color
         self.text = text
 
@@ -30,6 +30,7 @@ class Tile(CanvasObject):
         self._txt = None
 
         self.frozen = frozen
+        self.highlighted = False
         self._moving = False
         self.grid_pos = None if self.grid is None else self.grid.position_snapped_to_grid(self._pxcoord)
 
@@ -111,6 +112,19 @@ class Tile(CanvasObject):
                                             font="Comic {} bold".format(self.fontsize),
                                             fill="white")
         self._start_bindings()
+
+    def highlight(self):
+        if not self.highlighted:
+            self.highlighted = True
+            bbox = bbox_coord(self._pxcoord, self.grid.twidth * 1.1, self.grid.theight * 1.1)
+            self.canvas.delete(self._rect)
+            self._rect = self.canvas.create_rectangle(*bbox, fill=self.color, outline="yellow")
+
+    def unhighlight(self):
+        if self.highlighted:
+            self.highlighted = False
+            self.hide()
+            self.reveal()
 
 
 def bbox_coord(coord, width, height):

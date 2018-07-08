@@ -11,6 +11,7 @@ class Dice(CanvasObject):
 
         self.value = "#"  # will hold dice roll
         self.frozen = False  # start un-frozen
+        self.highlighted = False
 
         # canvas objects
         self._rect = None
@@ -21,9 +22,9 @@ class Dice(CanvasObject):
         bbox = bbox_coord(self._pxcoord, self.grid.twidth, self.grid.theight)
         self._rect = self.canvas.create_rectangle(*bbox, fill="white", outline="black")
         self._txt = self.canvas.create_text(*self._pxcoord,
-                                             text=self.value,
-                                             font="Comic {} bold".format(int(self.grid.theight / 2)),
-                                             fill="black")
+                                            text=self.value,
+                                            font="Comic {} bold".format(int(self.grid.theight / 2)),
+                                            fill="black")
         self._start_bindings()
 
     def _remove(self):
@@ -61,6 +62,19 @@ class Dice(CanvasObject):
 
     def _click_roll(self, event):
         self.roll()
+
+    def highlight(self):
+        if not self.highlighted:
+            self.highlighted = True
+            bbox = bbox_coord(self._pxcoord, self.grid.twidth * 1.1, self.grid.theight * 1.1)
+            self.canvas.delete(self._rect)
+            self._rect = self.canvas.create_rectangle(*bbox, fill="white", outline="yellow")
+
+    def unhighlight(self):
+        if self.highlighted:
+            self.highlighted = False
+            self.hide()
+            self.reveal()
 
 
 def bbox_coord(coord, width, height):
