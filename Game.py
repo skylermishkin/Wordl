@@ -65,7 +65,7 @@ class Game(object):
         player_colors = ["yellow", "brown", "white", "grey"]
         for i in range(self.num_players):
             p = Player(self.canvas,
-                       pxcoord=self.grid.pxcoord_from_coord((i, 0)),
+                       grid_pos=i,
                        grid=self.grid,
                        diameter=self.theight*0.5,
                        color=player_colors[i],
@@ -76,8 +76,7 @@ class Game(object):
         self.board.setup()
         self.board.create()
         for p in self.players:
-            player = p[0]
-            player.reveal()
+            p[0].reveal()
 
     def _start_listeners(self, groups={"movement", "pickup"}):
         """
@@ -156,10 +155,23 @@ class Game(object):
                 for die in self.d6set:
                     if die.grid_pos == grid_pos:
                         die.highlight()
-                        # find tiles to highlight
-                    else:  # make sure to unhighlight others
+                        self.board.highlight(self._reached_path_pos(die.value))
+                    else:  # make sure to unhighlight
                         if die.highlighted:
                             die.unhighlight()
+                            self.board.unhighlight(self._reached_path_pos(die.value))
+
+    def _reached_path_pos(self, dist):
+        """The positions on the board path reached from the active player by the dist.
+
+        :param dist:
+        :return:
+        """
+        for p in self.players:
+            if p[0].is_active:
+                print(p[0].grid_pos, dist)
+                return (self.grid.sanitized_path_pos(p[0].grid_pos + dist),
+                        self.grid.sanitized_path_pos(p[0].grid_pos - dist))
 
     def _toggle_players_visibility(self, event):
         print("Toggled player visibility")

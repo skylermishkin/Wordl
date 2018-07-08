@@ -65,7 +65,6 @@ class Dice(CanvasObject):
 
     def highlight(self):
         if not self.highlighted:
-            print("highlighting")
             self.highlighted = True
             bbox = bbox_coord(self._pxcoord, self.grid.twidth * 1.1, self.grid.theight * 1.1)
             self.canvas.delete(self._rect)

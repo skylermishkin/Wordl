@@ -4,8 +4,8 @@ from Hand import *
 
 
 class Player(CanvasObject):
-    def __init__(self, canvas, pxcoord, grid=None, diameter=100, color="yellow", name="Player{}", *args, **kwargs):
-        CanvasObject.__init__(self, canvas, pxcoord, grid)
+    def __init__(self, canvas, pxcoord=None, grid=None, grid_pos=None, diameter=100, color="yellow", name="Player{}", *args, **kwargs):
+        CanvasObject.__init__(self, canvas, pxcoord, grid, grid_pos)
         self.diameter = diameter
         self.color = color
         self.name = name

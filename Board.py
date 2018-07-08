@@ -27,6 +27,7 @@ class Board(object):
 
         self.d6 = Dice(sides=6)
 
+        self.highlighted_positions = []
         # canvas objects
         self._pathlings = []  # list of rects used to make the board path
         self.tile_map = {}  # {pos: Tile(), ...}
@@ -49,20 +50,37 @@ class Board(object):
                                       frozen=True)
 
     def create(self):
-        self._create_path()
+        self._refresh_path()
         for t in self.tile_map:
             self.tile_map[t].reveal()
 
-    def _create_path(self):
-        # delete old pathlings; not optimal, maybe not required
+    def _refresh_path(self):
+        # delete old pathlings
         for g in self._pathlings:
             self.canvas.delete(g)
+        self._pathlings = []
         # iterate through positions on the board and print a rectangle
         for pos in range(self.width * 2 + self.height * 2):
-            self._pathlings.append(self.canvas.create_rectangle(
-                *bbox_coord(self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
-                            self.grid.twidth, self.grid.theight),
-                fill="white", outline="black"))
+            if pos in self.highlighted_positions:
+                self._pathlings.append(self.canvas.create_rectangle(
+                    *bbox_coord(self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
+                                self.grid.twidth*1.1, self.grid.theight*1.1),
+                    fill="white", outline="yellow", width=5))
+            else:
+                self._pathlings.append(self.canvas.create_rectangle(
+                    *bbox_coord(self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
+                                self.grid.twidth, self.grid.theight),
+                    fill="white", outline="black"))
+
+    def highlight(self, positions):
+        for p in positions:
+            self.highlighted_positions.append(p)
+        self.create()
+
+    def unhighlight(self, positions=None):
+        for p in positions:
+            self.highlighted_positions.remove(p)
+        self.create()
 
     def _generate_letter_positions(self, pool):
         letter_map = []
