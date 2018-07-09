@@ -63,3 +63,6 @@ class CanvasObject:
         print("movement not drawn")  # canvas.move or canvas.coords
         self._pxcoord[0] = new_x
         self._pxcoord[1] = new_y
+
+    def is_hidden(self):
+        return self._hidden

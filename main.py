@@ -33,8 +33,9 @@ class WordlApp(object):
         self._create_new_game()
         self.canvas.pack()
 
-        # stages can be {"determining_power", "collecting", "finalizing"}
-        self._stage = "determining_power"
+        # stages can be {"setting", "playing"}
+        self._stage = "setting"
+        # TODO: implement GUI prompts for game settings (like num players)
 
         # app lifecycle
         self.persist = True
@@ -42,22 +43,6 @@ class WordlApp(object):
             self.game.update()
             self.root.update_idletasks()
         self.root.destroy()
-
-    def mediate_control(self):
-        """ Handles the stages of the game (power determination, exploration, and finalization). This
-        likely involves calling some methods of the game that are stage-specific. Ultimately updates the game to ensure
-        the changes to game are appropriately reflected to the user.
-
-        """
-        # TODO
-        if self._stage == "determining_power":
-            self.game.determine_powers()
-        elif self._stage == "collecting":
-            pass
-        elif self._stage == "finalizing":
-            pass
-        self.game.update()
-        self._stage = self.game.stage
 
     def _create_menus(self):
         # instantiate a parent tk Menu

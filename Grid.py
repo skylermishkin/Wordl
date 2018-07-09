@@ -90,7 +90,7 @@ class Grid(object):
         :param pos:
         :return pos:
         """
-        max_pos = self.cols * 2 + self.rows * 2 - 3
+        max_pos = self.cols * 2 + self.rows * 2 - 4
         if pos < 0:
             pos = max_pos + pos
         elif pos >= max_pos:
@@ -113,7 +113,7 @@ class Grid(object):
             pos_pxcoord = self.position_pxcoords[i]
             euclidean_distances.append(math.hypot(pxcoord[0] - pos_pxcoord[0], pxcoord[1] - pos_pxcoord[1]))
         min_dist = min(euclidean_distances)
-        print("Snapped to pos {}".format(euclidean_distances.index(min_dist)))
+        # print("Snapped to pos {}".format(euclidean_distances.index(min_dist)))
         return euclidean_distances.index(min_dist)
 
     def position_from_pxcoord(self, pxcoord):
@@ -137,7 +137,7 @@ class Grid(object):
         # TODO: only works for top and left sides
         pos = self.position_from_pxcoord(pxcoord)
         if pos is not None:
-            for path_pos in range(self.rows * 2 + self.cols * 2 - 3):
+            for path_pos in range(self.rows * 2 + self.cols * 2 - 4):
                 if self.coord_from_path_pos(path_pos) == self.coord_from_pos(pos):
                     return path_pos
         return None

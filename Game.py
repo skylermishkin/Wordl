@@ -6,7 +6,7 @@ from settings import *
 
 
 class Game(object):
-    def __init__(self, canvas, num_players=1, *args, **kwargs):
+    def __init__(self, canvas, num_players=2, *args, **kwargs):
         """ctor
 
         :param canvas:
@@ -114,11 +114,11 @@ class Game(object):
         if self.highlighting:
             dice_pos = self.dice_grid.position_from_pxcoord((self._mousex, self._mousey))
             board_pos = self.grid.path_pos_from_pxcoord((self._mousex, self._mousey))
-            print("Dice {}, board {}".format(dice_pos, board_pos))
+            print("Clicked dice {}, board {}".format(dice_pos, board_pos))
             if dice_pos is not None:
                 for die in self.d6set:
                     reached_positions = self.__reached_path_positions(die.value)
-                    if die.grid_pos == dice_pos:
+                    if die.grid_pos == dice_pos and not die.is_hidden():
                         die.highlight()
                         self.board.highlight(reached_positions)
                     else:  # make sure to un-highlight
@@ -164,7 +164,7 @@ class Game(object):
             for die in self.d4set:
                 die.reveal()
             self.stage = "determining_power"
-            print("\n############DETERMINE POWERS############\n")
+            print("\n############\nDETERMINE POWERS\n############\n")
             print("{} begin your rolls".format(self.players[0][0].name))  # TODO better GUI visual
 
         if self.stage is "determining_power":
@@ -215,7 +215,7 @@ class Game(object):
                         if i + 1 < len(self.players):
                             self.players[i+1][0].is_active = True
                             # TODO: make better GUI visual
-                            print("{} begin your rolls".format(self.players[i+1][0].name))
+                            print("\n{} begin your rolls".format(self.players[i+1][0].name))
                             for die in self.d4set:
                                 die.reveal()
                                 die.frozen = False
@@ -223,12 +223,13 @@ class Game(object):
                         else:  # start back at player 1
                             self.players[0][0].is_active = True
                             # TODO better GUI visuals
-                            print("\n############COLLECTION PHASE############\n")
+                            print("\n############\nCOLLECTION PHASE\n############\n")
                             self.stage = "collecting"
-                            print("{} begin your turn".format(self.players[0][0].name))
+                            print("\n{} begin your turn".format(self.players[0][0].name))
                             for die in self.d6set:
                                 die.reveal()
                             self.active_dice = self.d6set
+                break
 
     def collection(self):
         """
@@ -244,7 +245,7 @@ class Game(object):
                 if self._all_moves_used():
                     self.highlighting = False
                     player.is_active = False
-                    if i+1 < len(self.players):
+                    if i + 1 < len(self.players):
                         print("{} start your turn".format(self.players[i+1][0].name))
                         self.players[i+1][0].is_active = True
                     else:
@@ -256,6 +257,7 @@ class Game(object):
                         die.value = "#"
                         die.hide()
                         die.reveal()
+                break
 
     def finalization(self):
         """
@@ -273,7 +275,7 @@ class Game(object):
                 break
         moves_used = 0
         for die in self.d6set:
-            if die._hidden:
+            if die.is_hidden():
                 moves_used += 1
         if moves_used == player.power:
             return True
@@ -289,4 +291,4 @@ class Game(object):
     def _num_dice_hidden(dice):
         result = 0
         for die in dice:
-            result += 1 if die._hidden else 0
+            result += 1 if die.is_hidden() else 0
