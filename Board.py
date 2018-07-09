@@ -62,7 +62,7 @@ class Board(object):
             self.canvas.delete(g)
         self._pathlings = []
         # iterate through positions on the board and print a rectangle
-        for pos in range(self.width * 2 + self.height * 2):
+        for pos in range(self.width * 2 + self.height * 2 - 3):
             if pos in self.highlighted_positions:
                 self._pathlings.append(self.canvas.create_rectangle(
                     *self.grid.bbox_coord(self.grid.pxcoord_from_path_pos(pos)),

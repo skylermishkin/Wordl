@@ -21,10 +21,8 @@ class Hand(object):
 
         # canvas objects
         self.tiles = {}  # {Tile: pos, ...}
-        ul_pxcoord = self.grid.pxcoord_from_coord((0, 0))
-        br_pxcoord = self.grid.pxcoord_from_coord((self.cols, self.rows))
-        self.outline = self.canvas.create_rectangle(ul_pxcoord[0]-0.5*self.twidth, ul_pxcoord[1]-0.5*self.theight,
-                                                    br_pxcoord[0]-0.5*self.twidth, br_pxcoord[1]-0.5*self.theight,
+        self.outline = self.canvas.create_rectangle(self.grid.px_x, self.grid.px_y,
+                                                    self.grid.px_x + self.grid.width, self.grid.px_y + self.grid.height,
                                                     fill="white", outline="black")
 
     def add(self, letter):

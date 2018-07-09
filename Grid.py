@@ -57,20 +57,20 @@ class Grid(object):
         """
         x = 0
         y = 0
-        prior_corner_pos = self.cols
-        if pos <= self.cols:
+        prior_corner_pos = self.cols - 1
+        if pos <= prior_corner_pos:
             x = pos
         elif pos > prior_corner_pos:
-            x = self.cols
+            x = self.cols - 1
             y = pos - prior_corner_pos
-            prior_corner_pos = self.cols + self.rows
+            prior_corner_pos = self.cols + self.rows - 2
         if pos > prior_corner_pos:
-            y = self.rows
-            x = self.cols - (pos - prior_corner_pos)
-            prior_corner_pos = self.cols * 2 + self.rows
+            y = self.rows - 1
+            x = self.cols - (pos - prior_corner_pos) - 1
+            prior_corner_pos = self.cols * 2 + self.rows - 3
         if pos > prior_corner_pos:
             x = 0
-            y = self.rows - (pos - prior_corner_pos)
+            y = self.rows - (pos - prior_corner_pos) - 1
         return x, y
 
     def position_from_path_pos(self, pos):
@@ -90,7 +90,7 @@ class Grid(object):
         :param pos:
         :return pos:
         """
-        max_pos = self.cols * 2 + self.rows * 2
+        max_pos = self.cols * 2 + self.rows * 2 - 3
         if pos < 0:
             pos = max_pos + pos
         elif pos >= max_pos:
@@ -104,7 +104,7 @@ class Grid(object):
         :param coord:
         :return px_x, px_y: the pixel coordinates
         """
-        return self.px_x + ((coord[0]) * self.twidth), self.px_y + ((coord[1]) * self.theight)
+        return self.px_x + ((coord[0] + 0.5) * self.twidth), self.px_y + ((coord[1] + 0.5) * self.theight)
 
     def position_snapped_to_grid(self, pxcoord):
         # TODO non-overlap option
@@ -137,10 +137,7 @@ class Grid(object):
         # TODO: only works for top and left sides
         pos = self.position_from_pxcoord(pxcoord)
         if pos is not None:
-            for path_pos in range(self.rows * 2 + self.cols * 2):
-                print("pos {}, coord from pos {}, coord from pppos {}".format(pos,
-                                                                              self.coord_from_pos(pos),
-                                                                              self.coord_from_path_pos(path_pos)))
+            for path_pos in range(self.rows * 2 + self.cols * 2 - 3):
                 if self.coord_from_path_pos(path_pos) == self.coord_from_pos(pos):
                     return path_pos
         return None

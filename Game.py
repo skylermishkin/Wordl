@@ -30,15 +30,15 @@ class Game(object):
 
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
-        self.twidth = (self.cwidth - LR_PAD * 2) / BOARD_WIDTH
-        self.theight = (self.cheight - TB_PAD * 2) / BOARD_HEIGHT
+        self.twidth = int(float(self.cwidth - LR_PAD * 2) / BOARD_WIDTH)
+        self.theight = int(float(self.cheight - TB_PAD * 2) / BOARD_HEIGHT)
         self.grid = Grid(BOARD_WIDTH, BOARD_HEIGHT,
                          px_x=LR_PAD,
                          px_y=TB_PAD,
                          width=self.twidth * BOARD_WIDTH,
                          height=self.theight * BOARD_HEIGHT)
         self.dice_grid = Grid(1, 8,
-                              px_x=(BOARD_WIDTH - 2) * self.twidth + LR_PAD,
+                              px_x=(BOARD_WIDTH - 3) * self.twidth + LR_PAD,
                               px_y=3 * self.theight + TB_PAD,
                               width=self.twidth,
                               height=6 * self.theight)
@@ -79,33 +79,6 @@ class Game(object):
         self.board.create()
         for p in self.players:
             p[0].reveal()
-
-    def _start_listeners(self, groups={"move"}):
-        """
-
-        :param groups: {"move", "roll"}
-        :return:
-        """
-        if "move" in groups:
-            pass  # todo
-        if "roll" in groups:
-            pass # TODO
-
-    def _kill_listeners(self, groups={"move"}):
-        """
-
-        :param groups: {"move", "roll"}
-        :return:
-        """
-        if "move" in groups:
-            pass  # todo
-        if "roll" in groups:
-            pass  # TODO
-
-    @staticmethod
-    def _ignore(self, event):
-        # for "killing" listeners
-        pass
 
     def _collect_tile(self, event=None):
         for p in self.players:
@@ -191,7 +164,7 @@ class Game(object):
             for die in self.d4set:
                 die.reveal()
             self.stage = "determining_power"
-            print("############DETERMINE POWERS############")
+            print("\n############DETERMINE POWERS############\n")
             print("{} begin your rolls".format(self.players[0][0].name))  # TODO better GUI visual
 
         if self.stage is "determining_power":
@@ -250,7 +223,7 @@ class Game(object):
                         else:  # start back at player 1
                             self.players[0][0].is_active = True
                             # TODO better GUI visuals
-                            print("############COLLECTION PHASE############")
+                            print("\n############COLLECTION PHASE############\n")
                             self.stage = "collecting"
                             print("{} begin your turn".format(self.players[0][0].name))
                             for die in self.d6set:
