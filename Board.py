@@ -66,7 +66,7 @@ class Board(object):
             if pos in self.highlighted_positions:
                 self._pathlings.append(self.canvas.create_rectangle(
                     *self.grid.bbox_coord(self.grid.pxcoord_from_path_pos(pos)),
-                    fill="white", outline="yellow", width=5))
+                    fill="white", outline="yellow", width=HIGHLIGHT_WIDTH))
             else:
                 self._pathlings.append(self.canvas.create_rectangle(
                     *self.grid.bbox_coord(self.grid.pxcoord_from_path_pos(pos)),

@@ -2,6 +2,8 @@ from settings import *
 from Grid import *
 from Tile import *
 
+from natsort import natsorted
+
 
 class Hand(object):
     def __init__(self, canvas, grid, rows=10, cols=10, hidden=False, *args, **kwargs):
@@ -20,14 +22,14 @@ class Hand(object):
         self.grid = grid
 
         # canvas objects
-        self.tiles = {}  # {Tile: pos, ...}
+        self.tiles = []  # [[Tile, pos], ...]
         self.outline = self.canvas.create_rectangle(self.grid.px_x, self.grid.px_y,
                                                     self.grid.px_x + self.grid.width, self.grid.px_y + self.grid.height,
                                                     fill="white", outline="black")
 
     def add(self, letter):
         if len(self.tiles) < self.rows * self.cols:
-            used_positions = [self.tiles[tile] for tile in self.tiles]
+            used_positions = [t[1] for t in self.tiles]
             for i in range(self.rows * self.cols):
                 if i not in used_positions:
                     print("Assigning {} to position {}".format(letter, i))
@@ -43,12 +45,13 @@ class Hand(object):
                         color=color, text=letter,
                         width=self.twidth, height=self.theight, frozen=False)
         new_tile.reveal()
-        self.tiles[new_tile] = i
+        self.tiles.append([new_tile, i])
         print("Hand: {}".format(self.tiles))
 
     def update(self):
-        for tile in self.tiles:
-            self.tiles[tile] = tile.grid_pos
+        for t in self.tiles:
+            t[1] = t[0].grid_pos
+        self._highlight_words()
 
     def toggle_visibility(self):
         if self._hidden:
@@ -59,18 +62,46 @@ class Hand(object):
     def hide(self):
         if not self._hidden:
             self._hidden = True
-            for tile in self.tiles:
-                tile.hide()
+            for t in self.tiles:
+                t[0].hide()
 
     def reveal(self):
         if self._hidden:
             self._hidden = False
-            for tile in self.tiles:
-                tile.reveal()
+            for t in self.tiles:
+                t[0].reveal()
 
     def _positions_used(self):
-        return [self.grid.position_from_coord(e[1]) for e in self.tiles]
+        return [e[1] for e in self.tiles]
 
     def _highlight_words(self):
-        # TODO: dictionary integration
-        pass
+        grouped_tiles = self._group_tiles()
+        for group in grouped_tiles:
+            word = "".join([tile.text for tile in group])
+            if word.lower() in DICTIONARY:
+                for tile in group:
+                    tile.highlight()  # TODO: how am I going to unhighlight when a word is broken
+
+    def _group_tiles(self):
+        tile_groups = []
+        positions_used = natsorted(self._positions_used())
+        idx = 0
+        while idx < len(positions_used):
+            tmp_group = [self._tile_at_pos(positions_used[idx])]  # start contig at the current index
+            contig_length = 1
+            for i, p in enumerate(positions_used[idx+1:]):  # iterate through remaining tiles
+                # TODO: check for spanning multiple rows
+                if p - 1 == positions_used[idx + i]:  # ensure position is contiguous from the last
+                    contig_length += 1
+                    tmp_group.append(self._tile_at_pos(p))
+                else:
+                    break
+            tile_groups.append(tmp_group)
+            idx += contig_length
+        return tile_groups
+
+    def _tile_at_pos(self, pos):
+        for t in self.tiles:
+            if t[1] == pos:
+                return t[0]
+        return None

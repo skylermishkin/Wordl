@@ -97,6 +97,7 @@ class Tile(CanvasObject):
             self.canvas.tag_raise(self._txt)
             self._pxcoord[0] = new_x
             self._pxcoord[1] = new_y
+            self.grid_pos = None if self.grid is None else self.grid.position_from_pxcoord(self._pxcoord)
 
     def reroll(self, *args):
         """ Replaces a tile with one that's another letter from the same rank.
@@ -119,7 +120,9 @@ class Tile(CanvasObject):
             self.highlighted = True
             bbox = self.grid.bbox_coord(self._pxcoord)
             self.canvas.delete(self._rect)
-            self._rect = self.canvas.create_rectangle(*bbox, fill=self.color, outline="yellow", width=5)
+            self._rect = self.canvas.create_rectangle(*bbox, fill=self.color, outline="yellow", width=HIGHLIGHT_WIDTH)
+            self.canvas.tag_raise(self._rect)
+            self.canvas.tag_raise(self._txt)
 
     def unhighlight(self):
         if self.highlighted:

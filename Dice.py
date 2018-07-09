@@ -1,6 +1,7 @@
-import random
-
 from CanvasObject import *
+from settings import *
+
+import random
 
 
 class Dice(CanvasObject):
@@ -68,7 +69,7 @@ class Dice(CanvasObject):
             self.highlighted = True
             bbox = bbox_coord(self._pxcoord, self.grid.twidth, self.grid.theight)
             self.canvas.delete(self._rect)
-            self._rect = self.canvas.create_rectangle(*bbox, fill="white", outline="yellow", width=5)
+            self._rect = self.canvas.create_rectangle(*bbox, fill="white", outline="yellow", width=HIGHLIGHT_WIDTH)
             self.canvas.tag_raise(self._rect)
             self.canvas.tag_raise(self._txt)
 
