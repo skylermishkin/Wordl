@@ -39,7 +39,7 @@ class Game(object):
                          height=self.theight * BOARD_HEIGHT)
         self.dice_grid = Grid(1, 8,
                               px_x=(BOARD_WIDTH - 3) * self.twidth + LR_PAD,
-                              px_y=3 * self.theight + TB_PAD,
+                              px_y=2 * self.theight + TB_PAD,
                               width=self.twidth,
                               height=6 * self.theight)
 
@@ -74,6 +74,7 @@ class Game(object):
                        name="Player{}".format(i+1))
             p.is_active = True if i is 0 else False
             self.players.append([p, i])
+        self._prompt_box = None
 
         self.board.setup()
         self.board.create()
@@ -160,12 +161,14 @@ class Game(object):
 
     def update(self):
         # control phases/stages, visibilities (like dice) and listeners
+        self.canvas.update_idletasks()
         if self.stage is None:  # initialize
             for die in self.d4set:
                 die.reveal()
             self.stage = "determining_power"
-            print("\n############\nDETERMINE POWERS\n############\n")
+            print("\n###############\nDETERMINE POWERS\n###############\n")
             print("{} begin your rolls".format(self.players[0][0].name))  # TODO better GUI visual
+            self._prompt("{}'s roll".format(self.players[0][0].name))
 
         if self.stage is "determining_power":
             self.power_determination()
@@ -205,8 +208,9 @@ class Game(object):
                         self.active_dice = self.d8set
                 else:  # Determine word lengths
                     if self._all_dice_rolled():
-                        player.word_lengths = [die.value for die in self.d8set]
+                        player.word_lengths = sorted([die.value for die in self.d8set], reverse=True)
                         player.determine_power()
+                        player.update()
                         print("{} has {} power".format(player.name, player.power))
                         for die in self.d8set:
                             die.hide()
@@ -214,18 +218,18 @@ class Game(object):
                         player.is_active = False
                         if i + 1 < len(self.players):
                             self.players[i+1][0].is_active = True
-                            # TODO: make better GUI visual
                             print("\n{} begin your rolls".format(self.players[i+1][0].name))
+                            self._prompt("{}'s roll".format(self.players[i+1][0].name))  # TODO
                             for die in self.d4set:
                                 die.reveal()
                                 die.frozen = False
                             self.active_dice = self.d4set
                         else:  # start back at player 1
                             self.players[0][0].is_active = True
-                            # TODO better GUI visuals
-                            print("\n############\nCOLLECTION PHASE\n############\n")
+                            print("\n###############\nCOLLECTION PHASE\n###############\n")
                             self.stage = "collecting"
                             print("\n{} begin your turn".format(self.players[0][0].name))
+                            self._prompt("{}'s turn".format(self.players[0][0].name))  # TODO
                             for die in self.d6set:
                                 die.reveal()
                             self.active_dice = self.d6set
@@ -292,3 +296,11 @@ class Game(object):
         result = 0
         for die in dice:
             result += 1 if die.is_hidden() else 0
+
+    def _prompt(self, text):
+        if self._prompt_box is not None:
+            self.canvas.delete(self._prompt_box)
+        self._prompt_box = self.canvas.create_text(*self.grid.position_pxcoords[PROMPT_GRIDPOS],
+                                                   text=text,
+                                                   font="Comic {} bold".format(int(self.grid.theight / 2)),
+                                                   fill="black")

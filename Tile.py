@@ -53,19 +53,21 @@ class Tile(CanvasObject):
 
     def _start_bindings(self):
         # drag binding
-        self.canvas.tag_bind(self._rect, '<Button1-Motion>', self._drag)
-        self.canvas.tag_bind(self._rect, '<ButtonRelease-1>', self._release)
-        self.canvas.tag_bind(self._txt, '<Button1-Motion>', self._drag)
-        self.canvas.tag_bind(self._txt, '<ButtonRelease-1>', self._release)
+        if not self.frozen:
+            self.canvas.tag_bind(self._rect, '<Button1-Motion>', self._drag)
+            self.canvas.tag_bind(self._rect, '<ButtonRelease-1>', self._release)
+            self.canvas.tag_bind(self._txt, '<Button1-Motion>', self._drag)
+            self.canvas.tag_bind(self._txt, '<ButtonRelease-1>', self._release)
         # re-roll binding
-        if self.frozen:
+        else:
             self.canvas.tag_bind(self._rect, '<Double-Button-1>', self.reroll)
             self.canvas.tag_bind(self._txt, '<Double-Button-1>', self.reroll)
 
     def _drag(self, event):
         if self._moving:
             self.move(event.x, event.y)
-        elif not self.frozen:
+        else:
+            print("Picked up tile")
             self._moving = True
             self.canvas.tag_raise(self._rect)
             self.canvas.tag_raise(self._txt)
@@ -75,6 +77,7 @@ class Tile(CanvasObject):
     def _release(self, event):
         self._moving = False
         if not self.frozen and self.grid is not None:
+            print("Dropped tile")
             self.grid_pos = self.grid.position_snapped_to_grid([event.x, event.y])
             pxcoord = self.grid.position_pxcoords[self.grid_pos]
             self.move(pxcoord[0], pxcoord[1])
@@ -129,3 +132,6 @@ class Tile(CanvasObject):
             self.highlighted = False
             self.hide()
             self.reveal()
+
+    def is_moving(self):
+        return self._moving

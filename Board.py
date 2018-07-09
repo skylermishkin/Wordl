@@ -90,7 +90,7 @@ class Board(object):
         ranks_to_sample = [r for r in RANK_POP for _ in range(RANK_POP[r])]
         pos = 0
         empty = False
-        while pos <= self.height * 2 + self.width * 2 - 1:
+        while pos <= self.height * 2 + self.width * 2 - 4:
             rank_picked = random.sample(ranks_to_sample, 1)[0]
             pool_options = [l for l in pool if l in RANK_LETTERS[rank_picked]]
             while len(pool_options) == 0:

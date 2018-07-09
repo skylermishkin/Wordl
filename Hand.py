@@ -12,6 +12,8 @@ class Hand(object):
         self.cols = cols
         self._hidden = hidden
 
+        self.changed = False  # flag for update
+
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
         self.twidth = (self.cwidth - LR_PAD * 2) / (BOARD_WIDTH + 4)
@@ -26,6 +28,7 @@ class Hand(object):
         self.outline = self.canvas.create_rectangle(self.grid.px_x, self.grid.px_y,
                                                     self.grid.px_x + self.grid.width, self.grid.px_y + self.grid.height,
                                                     fill="white", outline="black")
+        self.highlights = []
 
     def add(self, letter):
         if len(self.tiles) < self.rows * self.cols:
@@ -46,12 +49,18 @@ class Hand(object):
                         width=self.twidth, height=self.theight, frozen=False)
         new_tile.reveal()
         self.tiles.append([new_tile, i])
+        self.changed = True
         print("Hand: {}".format(self.tiles))
 
     def update(self):
+        # TODO: only adding a new tile actually executes highlighting; movement surprisingly does not
         for t in self.tiles:
-            t[1] = t[0].grid_pos
-        self._highlight_words()
+            if t[1] != t[0].grid_pos:
+                t[1] = t[0].grid_pos
+                self.changed = True
+        if self.changed:
+            self.changed = False
+            self._highlight_words()
 
     def toggle_visibility(self):
         if self._hidden:
@@ -75,12 +84,24 @@ class Hand(object):
         return [e[1] for e in self.tiles]
 
     def _highlight_words(self):
+        # short-circuit if tiles are being moved
+        for t in self.tiles:
+            if t[0].is_moving():
+                return
+
+        words = []
+        # clear existing highlights
+        for h in self.highlights:
+            self.canvas.delete(h)
+        self.highlights = []
+        # ID all words and highlight real ones
         grouped_tiles = self._group_tiles()
         for group in grouped_tiles:
             word = "".join([tile.text for tile in group])
+            words.append(word)
             if word.lower() in DICTIONARY:
-                for tile in group:
-                    tile.highlight()  # TODO: how am I going to unhighlight when a word is broken
+                self._highlight_group(group)
+        print(words)
 
     def _group_tiles(self):
         tile_groups = []
@@ -99,6 +120,19 @@ class Hand(object):
             tile_groups.append(tmp_group)
             idx += contig_length
         return tile_groups
+
+    def _highlight_group(self, group):
+        ul_pxcoord = (group[0].pxcoord()[0] - group[0].grid.twidth * 0.5,
+                      group[0].pxcoord()[1] - group[0].grid.theight * 0.5)
+        br_pxcoord = (group[-1].pxcoord()[0] + group[-1].grid.twidth * 0.5,
+                      group[-1].pxcoord()[1] + group[-1].grid.theight * 0.5)
+        self.highlights.append(self.canvas.create_rectangle(ul_pxcoord[0], ul_pxcoord[1],
+                                                            br_pxcoord[0], br_pxcoord[1],
+                                                            fill="white", outline="yellow",
+                                                            width=HIGHLIGHT_WIDTH))
+        for t in self.tiles:
+            t[0].hide()
+            t[0].reveal()
 
     def _tile_at_pos(self, pos):
         for t in self.tiles:

@@ -66,3 +66,6 @@ class CanvasObject:
 
     def is_hidden(self):
         return self._hidden
+
+    def pxcoord(self):
+        return self._pxcoord

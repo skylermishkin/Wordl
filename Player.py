@@ -18,34 +18,40 @@ class Player(CanvasObject):
 
         # canvas objects
         self._circle = None
-        self._config_box = None
+        self._stat_box = None
         self.hand_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
                               px_x=2 * self.grid.twidth + LR_PAD,
-                              px_y=3 * self.grid.theight + TB_PAD,
+                              px_y=2 * self.grid.theight + TB_PAD,
                               width=int(BOARD_WIDTH / 3) * self.grid.twidth,
-                              height=int(BOARD_HEIGHT / 2) * self.grid.theight)
+                              height=int(BOARD_HEIGHT - 4) * self.grid.theight)
         self.hand = Hand(self.canvas, grid=self.hand_grid, hidden=(not self.is_active))
 
     def update(self):
+        self.hand.update()
         if not self.is_active:
             self.hand.hide()
         else:
             self.hand.reveal()
-        self.hand.update()
+        self.hide()
+        self.reveal()
 
     def _create(self):
         # body
         self._circle = self.canvas.create_circle(self._pxcoord[0], self._pxcoord[1],
                                                  self.diameter * 0.5, fill=self.color)
-        # config box
-        # TODO
+        # stat box
+        self._stat_box = self.canvas.create_text(*self.grid.position_pxcoords[PLAYERSTAT_GRIDPOS],
+                                                 text="Power: {}\nWord lengths: {}".format(self.power,
+                                                                                           self.word_lengths),
+                                                 font="Comic {} bold".format(int(self.grid.theight / 3)),
+                                                 fill="black")
 
     def _remove(self):
         self._hidden = True
         self.canvas.delete(self._circle)
-        self.canvas.delete(self._config_box)
+        self.canvas.delete(self._stat_box)
         self._circle = None
-        self._config_box = None
+        self._stat_box = None
         self.hand.hide()
 
     def _start_bindings(self):
