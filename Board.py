@@ -47,7 +47,8 @@ class Board(object):
                                       height=self.grid.theight,
                                       color=RANK_COLOR[rank],
                                       text=letter,
-                                      frozen=True)
+                                      frozen=True,
+                                      grid=self.grid)
 
     def create(self):
         self._refresh_path()
@@ -64,13 +65,11 @@ class Board(object):
         for pos in range(self.width * 2 + self.height * 2):
             if pos in self.highlighted_positions:
                 self._pathlings.append(self.canvas.create_rectangle(
-                    *bbox_coord(self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
-                                self.grid.twidth, self.grid.theight),
+                    *self.grid.bbox_coord(self.grid.pxcoord_from_path_pos(pos)),
                     fill="white", outline="yellow", width=5))
             else:
                 self._pathlings.append(self.canvas.create_rectangle(
-                    *bbox_coord(self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(pos)),
-                                self.grid.twidth, self.grid.theight),
+                    *self.grid.bbox_coord(self.grid.pxcoord_from_path_pos(pos)),
                     fill="white", outline="black"))
 
     def highlight(self, positions):

@@ -30,18 +30,19 @@ class Game(object):
 
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
-        self.twidth = (self.cwidth - LR_PAD * 2) / (BOARD_WIDTH + 1)
-        self.theight = (self.cheight - TB_PAD * 2) / (BOARD_HEIGHT + 2)
+        self.twidth = (self.cwidth - LR_PAD * 2) / BOARD_WIDTH
+        self.theight = (self.cheight - TB_PAD * 2) / BOARD_HEIGHT
         self.grid = Grid(BOARD_WIDTH, BOARD_HEIGHT,
                          px_x=LR_PAD,
-                         px_y=self.theight + TB_PAD,
+                         px_y=TB_PAD,
                          width=self.twidth * BOARD_WIDTH,
                          height=self.theight * BOARD_HEIGHT)
         self.dice_grid = Grid(1, 8,
                               px_x=(BOARD_WIDTH - 2) * self.twidth + LR_PAD,
                               px_y=3 * self.theight + TB_PAD,
-                              width=1 * self.twidth,
+                              width=self.twidth,
                               height=6 * self.theight)
+
         self.d4 = Dice(sides=4)
         self.d4set = [Dice(sides=4,
                            canvas=self.canvas,
@@ -57,6 +58,7 @@ class Game(object):
         self.d8 = Dice(sides=8)
         self.d8set = None
         self.d20 = Dice(sides=20)
+        self.active_dice = self.d4set
         # canvas objects
         self.board = Board(self.canvas, self.grid,
                            width=BOARD_WIDTH, height=BOARD_HEIGHT,
@@ -78,62 +80,32 @@ class Game(object):
         for p in self.players:
             p[0].reveal()
 
-    def _start_listeners(self, groups={"movement", "pickup"}):
+    def _start_listeners(self, groups={"move"}):
         """
 
-        :param groups: {"movement", "pickup"}
+        :param groups: {"move", "roll"}
         :return:
         """
-        if "movement" in groups:
-            # simple player movement
-            self.canvas.bind("<Up>", self._move_player_up)
-            self.canvas.bind("<Down>", self._move_player_down)
-        if "pickup" in groups:
-            # simple tile pickup
-            self.canvas.bind("<space>", self._collect_tile)
-        if "rolling" in groups:
+        if "move" in groups:
+            pass  # todo
+        if "roll" in groups:
             pass # TODO
 
-    def _kill_listeners(self,  groups={"movement", "pickup"}):
+    def _kill_listeners(self, groups={"move"}):
         """
 
-        :param groups: {"movement", "pickup"}
+        :param groups: {"move", "roll"}
         :return:
         """
-        if "movement" in groups:
-            # simple player movement
-            self.canvas.bind("<Up>", self._ignore)
-            self.canvas.bind("<Down>", self._ignore)
-        if "pickup" in groups:
-            # simple tile pickup
-            self.canvas.bind("<space>", self._ignore)
-        if "rolling" in groups:
+        if "move" in groups:
+            pass  # todo
+        if "roll" in groups:
             pass  # TODO
 
     @staticmethod
     def _ignore(self, event):
         # for "killing" listeners
         pass
-
-    def _move_player_up(self, event=None):
-        print("Moving player up")
-        for p in self.players:
-            player = p[0]
-            if player.is_active:
-                p[1] += 1
-                p[1] = self.grid.sanitized_path_pos(p[1])
-                x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(p[1]))
-                player.move(x, y)
-
-    def _move_player_down(self, event=None):
-        print("Moving player down")
-        for p in self.players:
-            player = p[0]
-            if player.is_active:
-                p[1] -= 1
-                p[1] = self.grid.sanitized_path_pos(p[1])
-                x, y = self.grid.pxcoord_from_coord(self.grid.coord_from_path_pos(p[1]))
-                player.move(x, y)
 
     def _collect_tile(self, event=None):
         for p in self.players:
@@ -160,6 +132,8 @@ class Game(object):
                         die.hide()
                         player.hide()
                         player.reveal()
+            player.hide()
+            player.reveal()
 
     def _on_click(self, event):
         self._mousex, self._mousey = event.x, event.y
@@ -167,6 +141,7 @@ class Game(object):
         if self.highlighting:
             dice_pos = self.dice_grid.position_from_pxcoord((self._mousex, self._mousey))
             board_pos = self.grid.path_pos_from_pxcoord((self._mousex, self._mousey))
+            print("Dice {}, board {}".format(dice_pos, board_pos))
             if dice_pos is not None:
                 for die in self.d6set:
                     reached_positions = self.__reached_path_positions(die.value)
@@ -187,6 +162,11 @@ class Game(object):
                         reached_positions = self.__reached_path_positions(die.value)
                 if board_pos in reached_positions:
                     self._use_move(board_pos)
+        else:
+            dice_pos = self.dice_grid.position_from_pxcoord((self._mousex, self._mousey))
+            if dice_pos is not None:
+                for die in self.active_dice:
+                    die.roll()
 
     def __reached_path_positions(self, dist):
         """The positions on the board path reached from the active player by the dist.
@@ -199,7 +179,7 @@ class Game(object):
                 return (self.grid.sanitized_path_pos(p[0].grid_pos + dist),
                         self.grid.sanitized_path_pos(p[0].grid_pos - dist))
 
-    def _toggle_players_visibility(self, event):
+    def _toggle_players_visibility(self, event=None):
         print("Toggled player visibility")
         for p in self.players:
             player = p[0]
@@ -221,7 +201,7 @@ class Game(object):
             self.collection()
 
         if self.stage is "finalizing":
-            pass
+            self.finalization()
 
         for p in self.players:
             player = p[0]
@@ -237,7 +217,7 @@ class Game(object):
             player = p[0]
             if player.is_active:
                 if player.num_words is None:
-                    if self._all_dice_rolled(self.d4set):
+                    if self._all_dice_rolled():
                         player.num_words = sum([die.value for die in self.d4set])
                         for die in self.d4set:
                             die.hide()
@@ -249,8 +229,9 @@ class Game(object):
                                            freeze=True) for _ in range(player.num_words)]
                         for die in self.d8set:
                             die.reveal()
+                        self.active_dice = self.d8set
                 else:  # Determine word lengths
-                    if self._all_dice_rolled(self.d8set):
+                    if self._all_dice_rolled():
                         player.word_lengths = [die.value for die in self.d8set]
                         player.determine_power()
                         print("{} has {} power".format(player.name, player.power))
@@ -265,6 +246,7 @@ class Game(object):
                             for die in self.d4set:
                                 die.reveal()
                                 die.frozen = False
+                            self.active_dice = self.d4set
                         else:  # start back at player 1
                             self.players[0][0].is_active = True
                             # TODO better GUI visuals
@@ -273,6 +255,7 @@ class Game(object):
                             print("{} begin your turn".format(self.players[0][0].name))
                             for die in self.d6set:
                                 die.reveal()
+                            self.active_dice = self.d6set
 
     def collection(self):
         """
@@ -283,9 +266,23 @@ class Game(object):
         for i, p in enumerate(self.players):
             player = p[0]
             if player.is_active:
-                if self._all_dice_rolled(self.d6set):
+                if self._all_dice_rolled():
                     self.highlighting = True
-                    pass  # TODO do move cascade
+                if self._all_moves_used():
+                    self.highlighting = False
+                    player.is_active = False
+                    if i+1 < len(self.players):
+                        print("{} start your turn".format(self.players[i+1][0].name))
+                        self.players[i+1][0].is_active = True
+                    else:
+                        print("{} start your turn".format(self.players[0][0].name))
+                        self.players[0][0].is_active = True
+                    for die in self.d6set:
+                        die.highlighted = False
+                        die.frozen = False
+                        die.value = "#"
+                        die.hide()
+                        die.reveal()
 
     def finalization(self):
         """
@@ -296,9 +293,21 @@ class Game(object):
         # TODO
         pass
 
-    @staticmethod
-    def _all_dice_rolled(dice):
-        for die in dice:
+    def _all_moves_used(self):
+        for p in self.players:
+            player = p[0]
+            if player.is_active:
+                break
+        moves_used = 0
+        for die in self.d6set:
+            if die._hidden:
+                moves_used += 1
+        if moves_used == player.power:
+            return True
+        return False
+
+    def _all_dice_rolled(self):
+        for die in self.active_dice:
             if not die.frozen:
                 return False
         return True

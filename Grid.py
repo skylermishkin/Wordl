@@ -37,7 +37,7 @@ class Grid(object):
 
         row = 0
         curr_pos = 0
-        while curr_pos + self.cols <= pos:
+        while curr_pos + self.cols < pos + 1:
             row += 1
             curr_pos += self.cols
         col = 0
@@ -104,7 +104,7 @@ class Grid(object):
         :param coord:
         :return px_x, px_y: the pixel coordinates
         """
-        return self.px_x + (coord[0] * self.twidth), self.px_y + (coord[1] * self.theight)
+        return self.px_x + ((coord[0]) * self.twidth), self.px_y + ((coord[1]) * self.theight)
 
     def position_snapped_to_grid(self, pxcoord):
         # TODO non-overlap option
@@ -113,7 +113,7 @@ class Grid(object):
             pos_pxcoord = self.position_pxcoords[i]
             euclidean_distances.append(math.hypot(pxcoord[0] - pos_pxcoord[0], pxcoord[1] - pos_pxcoord[1]))
         min_dist = min(euclidean_distances)
-        print("Snapped min dist {} to pos {}".format(min_dist, euclidean_distances.index(min_dist)))
+        print("Snapped to pos {}".format(euclidean_distances.index(min_dist)))
         return euclidean_distances.index(min_dist)
 
     def position_from_pxcoord(self, pxcoord):
@@ -134,18 +134,15 @@ class Grid(object):
         return None
 
     def path_pos_from_pxcoord(self, pxcoord):
-        nearest_pos = self.position_snapped_to_grid(pxcoord)
-        nearest_pxcoord = self.position_pxcoords[nearest_pos]
-        minx = nearest_pxcoord[0] - 0.5 * self.twidth
-        maxx = nearest_pxcoord[0] + 0.5 * self.twidth
-        miny = nearest_pxcoord[1] - 0.5 * self.theight
-        maxy = nearest_pxcoord[1] + 0.5 * self.theight
-        if minx <= pxcoord[0] <= maxx:
-            if miny <= pxcoord[1] <= maxy:
-                for path_pos in range(self.rows * 2 + self.cols * 2):
-                    if self.coord_from_path_pos(path_pos) == self.coord_from_pos(nearest_pos):
-                        return path_pos
-                return None
+        # TODO: only works for top and left sides
+        pos = self.position_from_pxcoord(pxcoord)
+        if pos is not None:
+            for path_pos in range(self.rows * 2 + self.cols * 2):
+                print("pos {}, coord from pos {}, coord from pppos {}".format(pos,
+                                                                              self.coord_from_pos(pos),
+                                                                              self.coord_from_path_pos(path_pos)))
+                if self.coord_from_path_pos(path_pos) == self.coord_from_pos(pos):
+                    return path_pos
         return None
 
     def _cache_position_pxcoords(self):
@@ -153,3 +150,9 @@ class Grid(object):
             pos_coord = self.coord_from_pos(i)
             pos_pxcoord = self.pxcoord_from_coord(pos_coord)
             self.position_pxcoords.append(pos_pxcoord)
+
+    def bbox_coord(self, coord):
+        return (coord[0] - self.twidth * 0.5,
+                coord[1] - self.theight * 0.5,
+                coord[0] + self.twidth * 0.5,
+                coord[1] + self.theight * 0.5)

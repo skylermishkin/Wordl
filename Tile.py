@@ -32,11 +32,11 @@ class Tile(CanvasObject):
         self.frozen = frozen
         self.highlighted = False
         self._moving = False
-        self.grid_pos = None if self.grid is None else self.grid.position_snapped_to_grid(self._pxcoord)
+        self.grid_pos = None if self.grid is None else self.grid.position_from_pxcoord(self._pxcoord)
 
     def _create(self):
         self._hidden = False
-        bbox = bbox_coord(self._pxcoord, self.width, self.height)
+        bbox = self.grid.bbox_coord(self._pxcoord)
         self._rect = self.canvas.create_rectangle(*bbox, fill=self.color, outline="black")
         if self.text is not None:
             self._txt = self.canvas.create_text(self._pxcoord[0],
@@ -74,7 +74,7 @@ class Tile(CanvasObject):
 
     def _release(self, event):
         self._moving = False
-        if self.grid is not None:
+        if not self.frozen and self.grid is not None:
             self.grid_pos = self.grid.position_snapped_to_grid([event.x, event.y])
             pxcoord = self.grid.position_pxcoords[self.grid_pos]
             self.move(pxcoord[0], pxcoord[1])
@@ -90,12 +90,13 @@ class Tile(CanvasObject):
         :param new_y: pixels
         :return:
         """
-        self.canvas.coords(self._rect, *bbox_coord((new_x, new_y), self.width, self.height))
-        self.canvas.coords(self._txt, new_x, new_y)
-        self.canvas.tag_raise(self._rect)
-        self.canvas.tag_raise(self._txt)
-        self._pxcoord[0] = new_x
-        self._pxcoord[1] = new_y
+        if not self.frozen:
+            self.canvas.coords(self._rect, *self.grid.bbox_coord((new_x, new_y)))
+            self.canvas.coords(self._txt, new_x, new_y)
+            self.canvas.tag_raise(self._rect)
+            self.canvas.tag_raise(self._txt)
+            self._pxcoord[0] = new_x
+            self._pxcoord[1] = new_y
 
     def reroll(self, *args):
         """ Replaces a tile with one that's another letter from the same rank.
@@ -116,7 +117,7 @@ class Tile(CanvasObject):
     def highlight(self):
         if not self.highlighted:
             self.highlighted = True
-            bbox = bbox_coord(self._pxcoord, self.grid.twidth, self.grid.theight)
+            bbox = self.grid.bbox_coord(self._pxcoord)
             self.canvas.delete(self._rect)
             self._rect = self.canvas.create_rectangle(*bbox, fill=self.color, outline="yellow", width=5)
 
@@ -125,10 +126,3 @@ class Tile(CanvasObject):
             self.highlighted = False
             self.hide()
             self.reveal()
-
-
-def bbox_coord(coord, width, height):
-    return (coord[0] - width * 0.5,
-            coord[1] - height * 0.5,
-            coord[0] + width * 0.5,
-            coord[1] + height * 0.5,)
