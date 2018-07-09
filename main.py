@@ -23,6 +23,7 @@ class WordlApp(object):
         """
         self.root = tk.Tk(className="  Wordl  ")
         self._create_menus()
+        self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self.canvas = tk.Canvas(self.root, width=WIDTH, height=HEIGHT, highlightthickness=0, background="white")
         self.cwidth = self.canvas.winfo_reqwidth()
@@ -63,6 +64,9 @@ class WordlApp(object):
         help_menu.add_command(label="Rules...", command=self._rules)
 
         self.root.config(menu=menu_bar)
+
+    def _on_close(self, event=None):
+        self._exit()
 
     def _exit(self):
         self.root.quit()
