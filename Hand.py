@@ -12,7 +12,7 @@ class Hand(object):
         self.cols = cols
         self._hidden = hidden
 
-        self.changed = False  # flag for update
+        self.changed = True  # flag for update
 
         self.cwidth = self.canvas.winfo_reqwidth()
         self.cheight = self.canvas.winfo_reqheight()
@@ -25,10 +25,17 @@ class Hand(object):
 
         # canvas objects
         self.tiles = []  # [[Tile, pos], ...]
-        self.outline = self.canvas.create_rectangle(self.grid.px_x, self.grid.px_y,
-                                                    self.grid.px_x + self.grid.width, self.grid.px_y + self.grid.height,
-                                                    fill="white", outline="black")
+        self._outline = None
+        self.outline()
         self.highlights = []
+
+    def outline(self):
+        if self._outline is not None:
+            self.canvas.delete(self._outline)
+        self._outline = self.canvas.create_rectangle(self.grid.px_x, self.grid.px_y,
+                                                     self.grid.px_x + self.grid.width,
+                                                     self.grid.px_y + self.grid.height,
+                                                     fill="white", outline="black")
 
     def add(self, letter):
         if len(self.tiles) < self.rows * self.cols:
@@ -53,14 +60,15 @@ class Hand(object):
         print("Hand: {}".format(self.tiles))
 
     def update(self):
-        # TODO: only adding a new tile actually executes highlighting; movement surprisingly does not
+        # TODO: adding a new tile executes highlighting; movement surprisingly does not
         for t in self.tiles:
             if t[1] != t[0].grid_pos:
                 t[1] = t[0].grid_pos
                 self.changed = True
-        if self.changed:
-            self.changed = False
+        if not self._hidden and self.changed:
+
             self._highlight_words()
+            self.changed = False
 
     def toggle_visibility(self):
         if self._hidden:
@@ -71,6 +79,10 @@ class Hand(object):
     def hide(self):
         if not self._hidden:
             self._hidden = True
+            # clear existing highlights
+            for h in self.highlights:
+                self.canvas.delete(h)
+                self.highlights.remove(h)
             for t in self.tiles:
                 t[0].hide()
 
@@ -79,6 +91,7 @@ class Hand(object):
             self._hidden = False
             for t in self.tiles:
                 t[0].reveal()
+            self.update()
 
     def _positions_used(self):
         return [e[1] for e in self.tiles]
@@ -93,15 +106,15 @@ class Hand(object):
         # clear existing highlights
         for h in self.highlights:
             self.canvas.delete(h)
-        self.highlights = []
+            self.highlights.remove(h)
         # ID all words and highlight real ones
         grouped_tiles = self._group_tiles()
         for group in grouped_tiles:
             word = "".join([tile.text for tile in group])
-            words.append(word)
             if word.lower() in DICTIONARY:
+                words.append(word)
                 self._highlight_group(group)
-        print(words)
+        print("Highlighted words in hand: {}".format(words))
 
     def _group_tiles(self):
         tile_groups = []
@@ -139,3 +152,9 @@ class Hand(object):
             if t[1] == pos:
                 return t[0]
         return None
+
+    def regrid(self, new_grid):
+        self.grid = new_grid
+        for t in self.tiles:
+            t[0]._pxcoord = new_grid.position_pxcoords[t[1]]
+        self.update()

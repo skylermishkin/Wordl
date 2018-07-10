@@ -19,21 +19,29 @@ class Player(CanvasObject):
         # canvas objects
         self._circle = None
         self._stat_box = None
-        self.hand_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
-                              px_x=2 * self.grid.twidth + LR_PAD,
-                              px_y=2 * self.grid.theight + TB_PAD,
-                              width=int(BOARD_WIDTH / 3) * self.grid.twidth,
-                              height=int(BOARD_HEIGHT - 4) * self.grid.theight)
-        self.hand = Hand(self.canvas, grid=self.hand_grid, hidden=(not self.is_active))
+        self.hand_max_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
+                                  px_x=2 * self.grid.twidth + LR_PAD,
+                                  px_y=2 * self.grid.theight + TB_PAD,
+                                  width=int(BOARD_WIDTH / 3) * self.grid.twidth,
+                                  height=int(BOARD_HEIGHT - 4) * self.grid.theight)
+        self.hand_min_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
+                                  px_x=(2 + HAND_WIDTH) * self.grid.twidth + LR_PAD,
+                                  px_y=(2 + HAND_HEIGHT) * self.grid.theight + TB_PAD,
+                                  width=self.grid.twidth,
+                                  height=self.grid.theight)
+        self.trash = self.canvas.create_rectangle((2 + HAND_WIDTH) * self.grid.twidth + LR_PAD,
+                                (2 + HAND_HEIGHT) * self.grid.theight + TB_PAD,
+                                (6 + HAND_WIDTH) * self.grid.twidth + LR_PAD,
+                                (6 + HAND_HEIGHT) * self.grid.theight + TB_PAD, fill="yellow")
+        self.hand = Hand(self.canvas, grid=self.hand_max_grid, hidden=(not self.is_active))
 
     def update(self):
-        self.hand.update()
-        if not self.is_active:
-            self.hand.hide()
+        if self.is_active:
+            self.hide()
+            self.reveal()
         else:
-            self.hand.reveal()
-        self.hide()
-        self.reveal()
+            self.canvas.delete(self._stat_box)
+            self._stat_box = None
 
     def _create(self):
         # body
@@ -52,7 +60,6 @@ class Player(CanvasObject):
         self.canvas.delete(self._stat_box)
         self._circle = None
         self._stat_box = None
-        self.hand.hide()
 
     def _start_bindings(self):
         pass
@@ -64,13 +71,19 @@ class Player(CanvasObject):
         if not self._hidden:
             self._hidden = True
             self._remove()
-            self.hand.hide()
+
+    def minimize_hand(self):
+        self.hand.regrid(self.hand_min_grid)
+        self.hand.outline()
 
     def reveal(self):
         if self._hidden:
             self._hidden = False
             self._create()
-            self.hand.reveal()
+
+    def maximize_hand(self):
+        self.hand.regrid(self.hand_max_grid)
+        self.hand.outline()
 
     def move(self, new_x, new_y):
         """

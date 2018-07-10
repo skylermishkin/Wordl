@@ -6,7 +6,7 @@ from settings import *
 
 
 class Game(object):
-    def __init__(self, canvas, num_players=1, *args, **kwargs):
+    def __init__(self, canvas, num_players=2, *args, **kwargs):
         """ctor
 
         :param canvas:
@@ -167,7 +167,7 @@ class Game(object):
                 die.reveal()
             self.stage = "determining_power"
             print("\n###############\nDETERMINE POWERS\n###############\n")
-            print("{} begin your rolls".format(self.players[0][0].name))  # TODO better GUI visual
+            print("{} begin your rolls".format(self.players[0][0].name))
             self._prompt("{}'s roll".format(self.players[0][0].name))
 
         if self.stage is "determining_power":
@@ -182,6 +182,7 @@ class Game(object):
         for p in self.players:
             player = p[0]
             player.update()
+            player.hand.update()
         self.canvas.update()
 
     def power_determination(self):
@@ -219,17 +220,18 @@ class Game(object):
                         if i + 1 < len(self.players):
                             self.players[i+1][0].is_active = True
                             print("\n{} begin your rolls".format(self.players[i+1][0].name))
-                            self._prompt("{}'s roll".format(self.players[i+1][0].name))  # TODO
+                            self._prompt("{}'s roll".format(self.players[i+1][0].name))
                             for die in self.d4set:
                                 die.reveal()
                                 die.frozen = False
                             self.active_dice = self.d4set
                         else:  # start back at player 1
                             self.players[0][0].is_active = True
+                            self.players[0][0].hand.reveal()
                             print("\n###############\nCOLLECTION PHASE\n###############\n")
                             self.stage = "collecting"
                             print("\n{} begin your turn".format(self.players[0][0].name))
-                            self._prompt("{}'s turn".format(self.players[0][0].name))  # TODO
+                            self._prompt("{}'s turn".format(self.players[0][0].name))
                             for die in self.d6set:
                                 die.reveal()
                             self.active_dice = self.d6set
@@ -244,17 +246,29 @@ class Game(object):
         for i, p in enumerate(self.players):
             player = p[0]
             if player.is_active:
+                #player.maximize_hand()  # TODO
                 if self._all_dice_rolled():
                     self.highlighting = True
                 if self._all_moves_used():
                     self.highlighting = False
                     player.is_active = False
+                    player.hand.hide()
+                    player.update()
+                    #player.minimize_hand()  # TODO
                     if i + 1 < len(self.players):
                         print("{} start your turn".format(self.players[i+1][0].name))
+                        self._prompt("{}'s turn".format(self.players[i+1][0].name))
                         self.players[i+1][0].is_active = True
+                        self.players[i + 1][0].hand.reveal()
+                        self.players[i + 1][0].update()
+                        # self.players[i + 1][0].maximize_hand()  # TODO
                     else:
                         print("{} start your turn".format(self.players[0][0].name))
+                        self._prompt("{}'s turn".format(self.players[0][0].name))
                         self.players[0][0].is_active = True
+                        self.players[0][0].hand.reveal()
+                        self.players[0][0].update()
+                        # self.players[0][0].maximize_hand()  # TODO
                     for die in self.d6set:
                         die.highlighted = False
                         die.frozen = False

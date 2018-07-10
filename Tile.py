@@ -77,14 +77,10 @@ class Tile(CanvasObject):
     def _release(self, event):
         self._moving = False
         if not self.frozen and self.grid is not None:
-            print("Dropped tile")
             self.grid_pos = self.grid.position_snapped_to_grid([event.x, event.y])
+            print("Dropped tile to pos: {}".format(self.grid_pos))
             pxcoord = self.grid.position_pxcoords[self.grid_pos]
             self.move(pxcoord[0], pxcoord[1])
-            self.canvas.tag_raise(self._rect)
-            self.canvas.tag_raise(self._txt)
-            self._pxcoord[0] = pxcoord[0]
-            self._pxcoord[1] = pxcoord[1]
     
     def move(self, new_x, new_y):
         """

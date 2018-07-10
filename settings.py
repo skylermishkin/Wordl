@@ -62,3 +62,18 @@ DICTIONARY = []
 with open(DICTIONARY_RELPATH, "r") as f:
     for line in f:
         DICTIONARY.append(line.rstrip())
+
+
+'''
+self.max_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
+                     px_x=2 * self.grid.twidth + LR_PAD,
+                     px_y=2 * self.grid.theight + TB_PAD,
+                     width=int(BOARD_WIDTH / 3) * self.grid.twidth,
+                     height=int(BOARD_HEIGHT - 4) * self.grid.theight)
+
+self.min_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
+                     px_x=(2 + HAND_WIDTH) * self.grid.twidth + LR_PAD,
+                     px_y=(2 + HAND_HEIGHT) * self.grid.theight + TB_PAD,
+                     width=self.grid.twidth,
+                     height=self.grid.theight)
+'''
