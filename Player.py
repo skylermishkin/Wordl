@@ -18,7 +18,6 @@ class Player(CanvasObject):
 
         # canvas objects
         self._circle = None
-        self._stat_box = None
         self.hand_max_grid = Grid(HAND_WIDTH, HAND_HEIGHT,
                                   px_x=2 * self.grid.twidth + LR_PAD,
                                   px_y=2 * self.grid.theight + TB_PAD,
@@ -29,37 +28,21 @@ class Player(CanvasObject):
                                   px_y=(2 + HAND_HEIGHT) * self.grid.theight + TB_PAD,
                                   width=self.grid.twidth,
                                   height=self.grid.theight)
-        self.trash = self.canvas.create_rectangle((2 + HAND_WIDTH) * self.grid.twidth + LR_PAD,
-                                (2 + HAND_HEIGHT) * self.grid.theight + TB_PAD,
-                                (6 + HAND_WIDTH) * self.grid.twidth + LR_PAD,
-                                (6 + HAND_HEIGHT) * self.grid.theight + TB_PAD, fill="yellow")
         self.hand = Hand(self.canvas, grid=self.hand_max_grid, hidden=(not self.is_active))
 
     def update(self):
-        if self.is_active:
-            self.hide()
-            self.reveal()
-        else:
-            self.canvas.delete(self._stat_box)
-            self._stat_box = None
+        self.hide()
+        self.reveal()
 
     def _create(self):
         # body
         self._circle = self.canvas.create_circle(self._pxcoord[0], self._pxcoord[1],
                                                  self.diameter * 0.5, fill=self.color)
-        # stat box
-        self._stat_box = self.canvas.create_text(*self.grid.position_pxcoords[PLAYERSTAT_GRIDPOS],
-                                                 text="Power: {}\nWord lengths: {}".format(self.power,
-                                                                                           self.word_lengths),
-                                                 font="Comic {} bold".format(int(self.grid.theight / 3)),
-                                                 fill="black")
 
     def _remove(self):
         self._hidden = True
         self.canvas.delete(self._circle)
-        self.canvas.delete(self._stat_box)
         self._circle = None
-        self._stat_box = None
 
     def _start_bindings(self):
         pass

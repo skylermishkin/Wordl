@@ -75,6 +75,9 @@ class Game(object):
             p.is_active = True if i is 0 else False
             self.players.append([p, i])
         self._prompt_box = None
+        self._stat_box = None
+
+        self._prompt_text = ""
 
         self.board.setup()
         self.board.create()
@@ -112,7 +115,7 @@ class Game(object):
     def _on_click(self, event):
         self._mousex, self._mousey = event.x, event.y
         # print("Click: {}, {}".format(self._mousex, self._mousey))
-        if self.highlighting:
+        if self.highlighting:  # highlight path positions for the active player
             dice_pos = self.dice_grid.position_from_pxcoord((self._mousex, self._mousey))
             board_pos = self.grid.path_pos_from_pxcoord((self._mousex, self._mousey))
             print("Clicked dice {}, board {}".format(dice_pos, board_pos))
@@ -136,7 +139,7 @@ class Game(object):
                         reached_positions = self.__reached_path_positions(die.value)
                 if board_pos in reached_positions:
                     self._use_move(board_pos)
-        else:
+        else:  # roll dice
             dice_pos = self.dice_grid.position_from_pxcoord((self._mousex, self._mousey))
             if dice_pos is not None:
                 for die in self.active_dice:
@@ -168,7 +171,7 @@ class Game(object):
             self.stage = "determining_power"
             print("\n###############\nDETERMINE POWERS\n###############\n")
             print("{} begin your rolls".format(self.players[0][0].name))
-            self._prompt("{}'s roll".format(self.players[0][0].name))
+            self._prompt_text = "{}'s roll".format(self.players[0][0].name)
 
         if self.stage is "determining_power":
             self.power_determination()
@@ -183,6 +186,7 @@ class Game(object):
             player = p[0]
             player.update()
             player.hand.update()
+        self._prompt(show_player_stats=False if (self.stage is None or self.stage is "determining_power") else True)
         self.canvas.update()
 
     def power_determination(self):
@@ -220,7 +224,7 @@ class Game(object):
                         if i + 1 < len(self.players):
                             self.players[i+1][0].is_active = True
                             print("\n{} begin your rolls".format(self.players[i+1][0].name))
-                            self._prompt("{}'s roll".format(self.players[i+1][0].name))
+                            self._prompt_text = "{}'s roll".format(self.players[i+1][0].name)
                             for die in self.d4set:
                                 die.reveal()
                                 die.frozen = False
@@ -231,7 +235,7 @@ class Game(object):
                             print("\n###############\nCOLLECTION PHASE\n###############\n")
                             self.stage = "collecting"
                             print("\n{} begin your turn".format(self.players[0][0].name))
-                            self._prompt("{}'s turn".format(self.players[0][0].name))
+                            self._prompt_text = "{}'s turn".format(self.players[0][0].name)
                             for die in self.d6set:
                                 die.reveal()
                             self.active_dice = self.d6set
@@ -257,14 +261,14 @@ class Game(object):
                     #player.minimize_hand()  # TODO
                     if i + 1 < len(self.players):
                         print("{} start your turn".format(self.players[i+1][0].name))
-                        self._prompt("{}'s turn".format(self.players[i+1][0].name))
+                        self._prompt_text = "{}'s turn".format(self.players[i+1][0].name)
                         self.players[i+1][0].is_active = True
                         self.players[i + 1][0].hand.reveal()
                         self.players[i + 1][0].update()
                         # self.players[i + 1][0].maximize_hand()  # TODO
                     else:
                         print("{} start your turn".format(self.players[0][0].name))
-                        self._prompt("{}'s turn".format(self.players[0][0].name))
+                        self._prompt_text = "{}'s turn".format(self.players[0][0].name)
                         self.players[0][0].is_active = True
                         self.players[0][0].hand.reveal()
                         self.players[0][0].update()
@@ -310,11 +314,35 @@ class Game(object):
         result = 0
         for die in dice:
             result += 1 if die.is_hidden() else 0
+        return result
 
-    def _prompt(self, text):
+    def _prompt(self, text=None, show_player_stats=True):
+        if text is not None:
+            self._prompt_text = text
+
+        # clear old canvas items
         if self._prompt_box is not None:
             self.canvas.delete(self._prompt_box)
+            self.canvas.delete(self._stat_box)
+
+        # get active player
+        for p in self.players:
+            if p[0].is_active:
+                active_player = p[0]
+                break
+
+        # Game phase prompt
         self._prompt_box = self.canvas.create_text(*self.grid.position_pxcoords[PROMPT_GRIDPOS],
-                                                   text=text,
+                                                   text=self._prompt_text,
                                                    font="Comic {} bold".format(int(self.grid.theight / 2)),
                                                    fill="black")
+
+        if show_player_stats:
+            moves = "NA" if self.active_dice is not self.d6set else active_player.power - self._num_dice_hidden(self.d6set)
+            # player stat box
+            self._stat_box = self.canvas.create_text(*self.grid.position_pxcoords[PLAYERSTAT_GRIDPOS],
+                                 text="Power: {}  Moves: {}\nWord lengths: {}".format(active_player.power,
+                                                                                      moves,
+                                                                                      active_player.word_lengths),
+                                 font="Comic {} bold".format(int(self.grid.theight / 3)),
+                                 fill="black")
