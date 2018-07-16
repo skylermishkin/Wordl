@@ -98,12 +98,12 @@ class Tile(CanvasObject):
             self._pxcoord[0] = new_x
             self._pxcoord[1] = new_y
 
-    def reroll(self, *args):
+    def reroll(self, options=None, *args):
         """ Replaces a tile with one that's another letter from the same rank.
         """
         print("Rolling tile")
         rank = LETTER_RANK[self.text]
-        replacement_options = {repl for repl in RANK_LETTERS[rank] if repl != self.text}
+        replacement_options = options if options is not None else {repl for repl in RANK_LETTERS[rank] if repl != self.text}
         repl_letter = random.sample(replacement_options, 1)[0]
         self.text = repl_letter
         self.canvas.delete(self._txt)

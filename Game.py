@@ -6,7 +6,7 @@ from settings import *
 
 
 class Game(object):
-    def __init__(self, canvas, num_players=1, *args, **kwargs):
+    def __init__(self, canvas, num_players=2, *args, **kwargs):
         """ctor
 
         :param canvas:
@@ -90,9 +90,17 @@ class Game(object):
             if player.is_active:
                 for pos in self.board.tile_map:
                     if pos == p[1]:
-                        print("Collecting {} tile.".format(self.board.tile_map[pos].text))
-                        player.add_to_hand(self.board.tile_map[pos].text)
-                        self.board.tile_map[pos].reroll()
+                        letter = self.board.tile_map[pos].text
+                        print("Collecting {} tile.".format(letter))
+                        player.add_to_hand(letter)
+                        # TODO: pass reroll the options for letters of the same rank not already available
+                        self.board.tile_map[pos].reroll(options=self._tile_repl_options(letter))
+
+    def _tile_repl_options(self, letter):
+        rank = LETTER_RANK[letter]
+        used_letters = [self.board.tile_map[p].text for p in self.board.tile_map]
+        rank_options = RANK_LETTERS[rank]
+        return [l for l in rank_options if l not in used_letters] + [letter]
 
     def _use_move(self, path_pos):
         for p in self.players:
