@@ -76,11 +76,12 @@ class Tile(CanvasObject):
 
     def _release(self, event):
         self._moving = False
-        if not self.frozen and self.grid is not None:
-            self.grid_pos = self.grid.position_snapped_to_grid([event.x, event.y])
-            print("Dropped tile to pos: {}".format(self.grid_pos))
-            pxcoord = self.grid.position_pxcoords[self.grid_pos]
-            self.move(pxcoord[0], pxcoord[1])
+        if not self.frozen:
+            new_x, new_y = event.x, event.y
+            self.grid_pos = None if self.grid is None else self.grid.position_snapped_to_grid([new_x, new_y])
+            if self.grid_pos is not None:
+                new_x, new_y = self.grid.position_pxcoords[self.grid_pos]
+            self.move(new_x, new_y)
     
     def move(self, new_x, new_y):
         """
@@ -96,7 +97,6 @@ class Tile(CanvasObject):
             self.canvas.tag_raise(self._txt)
             self._pxcoord[0] = new_x
             self._pxcoord[1] = new_y
-            self.grid_pos = None if self.grid is None else self.grid.position_from_pxcoord(self._pxcoord)
 
     def reroll(self, *args):
         """ Replaces a tile with one that's another letter from the same rank.

@@ -6,7 +6,7 @@ from settings import *
 
 
 class Game(object):
-    def __init__(self, canvas, num_players=2, *args, **kwargs):
+    def __init__(self, canvas, num_players=1, *args, **kwargs):
         """ctor
 
         :param canvas:

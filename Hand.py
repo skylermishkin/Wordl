@@ -24,7 +24,8 @@ class Hand(object):
         self.grid = grid
 
         # canvas objects
-        self.tiles = []  # [[Tile, pos], ...]
+        self.tiles = []  # [Tile, ...]
+        self.tile_positions = []
         self._outline = None
         self.outline()
         self.highlights = []
@@ -39,7 +40,7 @@ class Hand(object):
 
     def add(self, letter):
         if len(self.tiles) < self.rows * self.cols:
-            used_positions = [t[1] for t in self.tiles]
+            used_positions = [t for t in self.tile_positions]
             for i in range(self.rows * self.cols):
                 if i not in used_positions:
                     print("Assigning {} to position {}".format(letter, i))
@@ -55,15 +56,16 @@ class Hand(object):
                         color=color, text=letter,
                         width=self.twidth, height=self.theight, frozen=False)
         new_tile.reveal()
-        self.tiles.append([new_tile, i])
+        self.tiles.append(new_tile)
+        self.tile_positions.append(i)
         self.changed = True
         print("Hand: {}".format(self.tiles))
 
     def update(self):
         # TODO: adding a new tile executes highlighting; movement surprisingly does not
-        for t in self.tiles:
-            if t[1] != t[0].grid_pos:
-                t[1] = t[0].grid_pos
+        for i, t in enumerate(self.tiles):
+            if self.tile_positions[i] != t.grid_pos:
+                self.tile_positions[i] = t.grid_pos
                 self.changed = True
         if not self._hidden and self.changed:
 
@@ -84,22 +86,20 @@ class Hand(object):
                 self.canvas.delete(h)
                 self.highlights.remove(h)
             for t in self.tiles:
-                t[0].hide()
+                t.hide()
 
     def reveal(self):
         if self._hidden:
             self._hidden = False
             for t in self.tiles:
-                t[0].reveal()
+                t.reveal()
+            self.changed = True
             self.update()
-
-    def _positions_used(self):
-        return [e[1] for e in self.tiles]
 
     def _highlight_words(self):
         # short-circuit if tiles are being moved
         for t in self.tiles:
-            if t[0].is_moving():
+            if t.is_moving():
                 return
 
         words = []
@@ -118,7 +118,7 @@ class Hand(object):
 
     def _group_tiles(self):
         tile_groups = []
-        positions_used = natsorted(self._positions_used())
+        positions_used = natsorted(self.tile_positions)
         idx = 0
         while idx < len(positions_used):
             tmp_group = [self._tile_at_pos(positions_used[idx])]  # start contig at the current index
@@ -139,22 +139,23 @@ class Hand(object):
                       group[0].pxcoord()[1] - group[0].grid.theight * 0.5)
         br_pxcoord = (group[-1].pxcoord()[0] + group[-1].grid.twidth * 0.5,
                       group[-1].pxcoord()[1] + group[-1].grid.theight * 0.5)
-        self.highlights.append(self.canvas.create_rectangle(ul_pxcoord[0], ul_pxcoord[1],
-                                                            br_pxcoord[0], br_pxcoord[1],
-                                                            fill="white", outline="yellow",
-                                                            width=HIGHLIGHT_WIDTH))
+        r = self.canvas.create_rectangle(ul_pxcoord[0], ul_pxcoord[1],
+                                         br_pxcoord[0], br_pxcoord[1],
+                                         fill="white", outline="yellow",
+                                         width=HIGHLIGHT_WIDTH)
+        self.highlights.append(r)
         for t in self.tiles:
-            t[0].hide()
-            t[0].reveal()
+            t.hide()
+            t.reveal()
 
     def _tile_at_pos(self, pos):
-        for t in self.tiles:
-            if t[1] == pos:
-                return t[0]
+        for i, p in enumerate(self.tile_positions):
+            if p == pos:
+                return self.tiles[i]
         return None
 
     def regrid(self, new_grid):
         self.grid = new_grid
-        for t in self.tiles:
-            t[0]._pxcoord = new_grid.position_pxcoords[t[1]]
+        for i, t in enumerate(self.tiles):
+            t._pxcoord = new_grid.position_pxcoords[self.tile_positions[i]]
         self.update()
