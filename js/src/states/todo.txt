@@ -1,0 +1,51 @@
+Cool shit to do
+
+SkylerNet
+
+	- Write some blogs!
+		- Have some with jupyter notebooks and cool shit
+			- Wordl design
+			- biopython intro
+			- sklearn intro
+
+	- Create some sweet projects
+		- Wordl as web app
+			- Phaser implementation in JS
+				- maybe Unity later...
+			- DB integration for user accounts, multiplayer, stats
+		- PrimerLite (python app)
+			- does it already exist? 
+			- if so: how can I extend?
+			- otherwise: 
+				- functionality to scan sequence contexts for mutation (VCF) entries from hg19 (compressed or indexed)
+				- functionality to design in DNA and RNA space
+					- also require exonic annotation
+					- also require splicing annotation
+				- optimization functionality:
+					- melting point estimation
+					- uniqueness/specificity/E-score
+						- BLAST against hg19 (DNA and RNA)
+				- extensions:
+					- bi-directional coverage
+						- template feeding correction
+					- CNVs and Fusions support (in VCF)
+						- multi-plex design
+		- CyberScribe
+			- does it already exist?
+			- if so: how can I expand?
+			- otherwise:
+				- templating framework
+					- work off LaTeX or CSS/HTML/JS
+					- ports to other common like pdf
+				- Natural language processing
+					- see what's out there already
+				- Machine Learning
+					- inferring based on context?
+					- making new template tags/formatting?
+
+
+Freelance
+	
+	- learn about sole proprietorship and taxation
+	- get some jobs
+	
